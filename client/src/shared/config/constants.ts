@@ -1,4 +1,4 @@
 export const SITE_CONFIG = {
-  NAME: 'Media House',
-  SHORT_NAME: 'M&H',
+  NAME: 'Job Analytics',
+  SHORT_NAME: 'J&A',
 } as const;
