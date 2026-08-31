@@ -1,0 +1,160 @@
+x-dev-logging: &dev-logging
+  logging: !override
+    driver: "none"
+
+services:
+  db:
+    ports:
+      - "${POSTGRES_PORT?Variable not set}:${POSTGRES_PORT?Variable not set}"
+    restart: "no"
+    <<: *dev-logging
+
+  pgadmin:
+    ports:
+      - "${PGADMIN_PORT?Variable not set}:${PGADMIN_PORT?Variable not set}"
+    restart: "no"
+    <<: *dev-logging
+
+  redis:
+    restart: "no"
+    ports:
+      - "${REDIS_PORT?Variable not set}:${REDIS_PORT?Variable not set}"
+    <<: *dev-logging
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    restart: "no"
+    ports: !override
+      - "${BACKEND_PORT?Variable not set}:${BACKEND_PORT?Variable not set}"
+    depends_on: !override
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck: !reset
+    environment:
+      BACKEND__UVICORN__PORT: ${BACKEND_PORT?Variable not set}
+      BACKEND__CORS__ALLOW_ORIGINS: ${BACKEND_CORS_ORIGINS?Variable not set}
+    volumes: !override
+      - ./backend/certificates:/app/certificates
+    #   - ./backend/htmlcov:/app/htmlcov
+    develop:
+      # Create a `watch` configuration to update the app
+      # https://docs.docker.com/compose/file-watch/#compose-watch-versus-bind-mounts
+      watch:
+        # Sync the working directory with the `/app` directory in the container
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./uv.lock
+    <<: *dev-logging
+
+  celery-beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    depends_on: !override
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: "no"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./backend/src/modules
+          target: /app/src/modules
+        - action: sync+restart
+          path: ./backend/src/notifications
+          target: /app/src/notifications
+        - action: sync+restart
+          path: ./backend/src/celery_app.py
+          target: /app/src/celery_app.py
+        - action: sync+restart
+          path: ./backend/src/core/config/celeryconfig.py
+          target: /app/src/core/config/celeryconfig.py
+    <<: *dev-logging
+
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    depends_on: !override
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: "no"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./backend/src/modules
+          target: /app/src/modules
+        - action: sync+restart
+          path: ./backend/src/notifications
+          target: /app/src/notifications
+        - action: sync+restart
+          path: ./backend/src/celery_app.py
+          target: /app/src/celery_app.py
+        - action: sync+restart
+          path: ./backend/src/core/config/celeryconfig.py
+          target: /app/src/core/config/celeryconfig.py
+    <<: *dev-logging
+  flower:
+    image: "${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}"
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    command: >
+      celery -A src.celery_app flower
+      --port=${FLOWER_PORT?Variable not set}
+      --basic_auth=${FLOWER_BASIC_AUTH?Variable not set}
+      --loglevel=${LOG_LEVEL?Variable not set}
+    restart: "no"
+    ports:
+      - "${FLOWER_PORT?Variable not set}:${FLOWER_PORT}"
+    <<: *dev-logging
+  maildev:
+    image: maildev/maildev
+    restart: "no"
+    ports:
+      - "${MAILDEV_WEB_PORT?Variable not set}:1080"
+      - "${MAILDEV_SMTP_PORT?Variable not set}:1025"
+    environment:
+      - TZ=Europe/Moscow
+      - MAILDEV_WEB_PORT=1080
+      - MAILDEV_SMTP_PORT=1025
+    networks:
+      - app-network
+    <<: *dev-logging
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+      args:
+        - NODE_ENV=development
+    restart: "no"
+    ports: !override
+      - "${CLIENT_PORT?Variable not set}:5173"
+    depends_on:
+      backend:
+        condition: service_started
+    healthcheck:
+      disable: true
+    environment: !override
+      VITE_API_URL: ${BACKEND_API_PREFIX?Variable not set}
+      VITE_BACKEND_HOST: ${BACKEND_HOST?Variable not set}
+      VITE_BACKEND_PORT: ${BACKEND_PORT?Variable not set}
+    volumes:
+      - ./client:/spa
+      - client-node-modules:/spa/node_modules
+    <<: *dev-logging
+
+volumes:
+  client-node-modules:

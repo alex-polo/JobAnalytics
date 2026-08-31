@@ -1,0 +1,223 @@
+[project]
+name = "api_app"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "fastapi>=0.135.1",
+    "gunicorn>=25.1.0",
+    "httpx>=0.28.1",
+    "passlib[bcrypt]>=1.7.4",
+    "pydantic[email]>=2.12.5",
+    "pydantic-settings>=2.13.1",
+    "pyjwt[crypto]>=2.12.1",
+    "python-multipart>=0.0.22",
+    "sentry-sdk>=2.54.0",
+    "sqlalchemy[asyncio]>=2.0.48",
+    "tenacity>=9.1.4",
+    "types-gunicorn>=25.1.0.20260215",
+    "uvicorn>=0.41.0",
+    "argon2-cffi>=25.1.0",
+    "types-passlib>=1.7.7.20260211",
+    "types-pyjwt>=1.7.1",
+    "celery[redis]>=5.6.3",
+    "flower>=2.0.1",
+    "celery-types>=0.26.0",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pre-commit>=4.5.1",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "pytest-deadfixtures>=3.1.0",
+    "pytest-env>=1.6.0",
+    "pytest-html>=4.2.0",
+    "pytest-sugar>=1.1.1",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.15.5",
+]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[project.scripts]
+run_dev = "run_dev:main"
+run_main = "run_main:main"
+
+
+[tool.ruff]
+src = ["src", "."]
+target-version = "py314"
+line-length = 88
+preview = true
+exclude = [
+    ".mypy_cache",
+    ".pytest_cache",
+    ".pyenv",
+    ".pytype",
+    ".ruff_cache",
+    ".venv",
+    "__pypackages__",
+    "__pycache__",
+    "alembic",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",        # pycodestyle errors - PEP 8 style errors
+    "W",        # pycodestyle warnings - PEP 8 style warnings
+    "F",        # Pyflakes - static analysis (undefined variables, imports)
+    "I",        # isort - import sorting and organization
+    "B",        # flake8-bugbear - potential bugs and bad practices
+    "C4",       # flake8-comprehensions - optimize list/dict/set comprehensions
+    "T20",      # flake8-print - warns about print/debug statements in code
+    "SIM",      # flake8-simplify - suggests code simplifications (if/else, loops)
+    "RUF",      # Ruff-specific rules
+    "Q",        # flake8-quotes - checks quote consistency
+    "UP",       # pyupgrade - suggests syntax updates for modern Python
+    "ARG",      # flake8-unused-arguments - finds unused function arguments
+    "D",        # pydocstyle - checks docstring style
+    "A",        # flake8-builtins - warns about using built-in names
+    "N",        # pep8-naming - checks naming conventions (CamelCase for classes)
+    "C90",      # mccabe - checks code complexity
+    "PTH",      # flake8-use-pathlib - recommends pathlib over os.path
+    "PLE",      # Pylint errors
+    "PLW",      # Pylint warnings
+    "FAST",     # FastAPI - checks proper FastAPI usage
+    "ASYNC",    # flake8-async - checks async code
+    "TID",      # flake8-tidy-imports - helps with import structure
+    "TCH",      # flake8-type-checking - separates type imports (speeds up startup)
+    "DTZ",      # flake8-datetimez - forbids datetime without timezone (critical for DB)
+    "ISC",      # flake8-implicit-str-concat - implicit string concat errors
+    "BLE",      # flake8-blind-except - forbids bare 'except:'
+    "S",        # Bandit - security checks
+    "LOG",      # flake8-logging - proper logging practices
+    "PERF",     # Perflint - performance checks
+    "ERA",      # Eradicate - removes commented-out code
+    "ANN",      # flake8-annotations - checks type annotations
+]
+ignore = [
+    "RUF002",   # Docstring contains ambiguous cirilic symbols
+    "D100",     # Missing docstring in public module
+    "D104",     # Missing docstring in public package
+    "S101",     # Allow asserts for pytest
+    "ISC001",   # Conflict with formatter
+]
+
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.flake8-type-checking]
+# Automatically moves type imports into `if TYPE_CHECKING:` block
+runtime-evaluated-base-classes = ["pydantic.BaseModel", "sqlalchemy.orm.DeclarativeBase"]
+
+[tool.ruff.lint.flake8-builtins]
+builtins-ignorelist = ["id", "type"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 72 # Отдельный лимит для docstrings согласно PEP8
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"src/core/database/*.py" = ["N805"]
+"src/core/database/mixins.py" = ["TC002", "TC001"]
+"src/users/infrastructure/models.py" = ["TC001"]
+#"alembic/env.py" = ["I001"]
+
+[tool.ruff.lint.pylint]
+allow-dunder-method-names = ["__tablename__", "__table_args__"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+
+# --- Files and Scopes ---
+mypy_path = "src"
+files = ["."]                   
+exclude = [".venv", "alembic"]
+ignore_missing_imports = true    # Prevent errors from third-party libraries that don't provide type hints
+
+plugins = [
+    "pydantic.mypy",             # Validates Pydantic models and their types
+    "sqlalchemy.ext.mypy.plugin" # Handles SQLAlchemy 2.0 Mapped types and relationships
+]
+
+# --- Output and Readability ---
+pretty = true                   # Pretty-print output
+show_error_codes = true         # Show specific error codes (e.g., [attr-defined]) for easy ignoring
+show_column_numbers = true      # Include column numbers in error messages for better IDE navigation
+
+# --- Strictness and Security ---
+disallow_untyped_calls = true   # Error when calling a function without type annotations
+disallow_untyped_defs = true    # Require type annotations for all function definitions
+disallow_incomplete_defs = true # Error if a function has partial type annotations (missing some args or return)
+check_untyped_defs = true       # Check the body of functions even if they don't have annotations
+
+# --- Code Quality Warnings ---
+warn_redundant_casts = true     # Warn if a type cast (cast()) is not actually needed
+warn_unused_ignores = true      # Warn about unnecessary "# type: ignore" comments
+warn_no_return = true           # Warn about functions that don't explicitly return
+warn_unreachable = true         # Warn about code that will never be executed
+
+[tool.pydantic-mypy]
+init_forbid_extra = true                # Error if extra arguments are passed to model __init__
+init_typed = true                       # Error if init() is not type annotated
+warn_required_dynamic_aliases = true    # Warn if fields use dynamic aliases that might break type checking
+warn_untyped_fields = true              # Warn if fields are not explicitly typed
+
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+addopts = "-ra -vv --tb=short -n auto --cov=src --cov-report=term-missing --cov-report=html:pytest_reports/coverage --html=pytest_reports/report.html --self-contained-html"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+python_files = "test_*.py"
+env = [
+    "ENV_FILE=.env.test",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+            "tests/*", 
+            "**/__init__.py", 
+            "backend_pre_start.py", 
+            "initial_data.py", 
+            "run_dev.py", 
+            "run_main.py",
+            "src/core/gunicorn/application.py"
+        ]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80

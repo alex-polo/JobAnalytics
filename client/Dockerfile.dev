@@ -1,0 +1,18 @@
+FROM node:24-alpine
+
+WORKDIR /spa
+
+COPY package*.json /spa/
+
+RUN npm install
+
+ARG VITE_API_URL=${VITE_API_URL}
+
+ARG NODE_ENV=development
+
+ENV VITE_API_URL=${VITE_API_URL}
+ENV NODE_ENV=${NODE_ENV}
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

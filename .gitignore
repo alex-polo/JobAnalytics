@@ -1,0 +1,6 @@
+.vscode
+.env
+.env.local
+.env.test
+.env.prod
+.env.dev

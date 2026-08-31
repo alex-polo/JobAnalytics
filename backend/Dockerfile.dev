@@ -1,0 +1,59 @@
+# Use the official uv image with Python 3.13 on Debian Bookworm (slim variant).
+# This image includes both Python and uv pre-installed.
+# Ref: https://docs.astral.sh/uv/guides/integration/docker/#available-images
+FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
+
+# Prevent uv from downloading Python (the base image already provides it).
+ENV UV_PYTHON_DOWNLOADS=0
+
+# Disable Python output buffering to ensure logs appear immediately 
+# in container logs.
+ENV PYTHONUNBUFFERED=1
+
+# Compiling Python source files to bytecode is typically desirable for production images
+# Ref: https://docs.astral.sh/uv/guides/integration/docker/#compiling-bytecode
+ENV UV_COMPILE_BYTECODE=0
+
+# Caching
+# Use 'copy' link mode to avoid hard-linking issues between cache and target filesystems.
+# Ref: https://docs.astral.sh/uv/guides/integration/docker/#caching
+ENV UV_LINK_MODE=copy
+
+# Ensure installed tools can be executed out of the box
+ENV UV_TOOL_BIN_DIR=/usr/local/bin
+
+# Install curl for health checks and remove apt lists to reduce image size
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Use `/app` as the working directory
+WORKDIR /app
+
+# Install dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-install-project
+
+# Copy the entire project source into the image.
+# Ensure `.venv` is excluded via `.dockerignore` to avoid platform conflicts.
+COPY . /app
+
+# Intermediate layers
+# Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
+# Sync the project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked
+
+# Place executables in the environment at the front of the path
+ENV PATH="/app/.venv/bin:$PATH"
+
+RUN chmod +x ./scripts/prestart.sh
+
+# Reset the entrypoint, don't invoke `uv`
+
+
+#ENTRYPOINT ["./scripts/prestart.sh"]
+
+# Run the development entrypoint defined in pyproject.toml.
+#CMD ["run_dev"]
