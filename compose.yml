@@ -43,6 +43,7 @@ x-backend-env: &backend-env
   BACKEND__REDIS__PORT: ${REDIS_PORT?Variable not set}
   BACKEND__REDIS__PASSWORD: ${REDIS_PASSWORD?Variable not set}
   BACKEND__REDIS__SSL: ${REDIS_SSL?Variable not set}
+  BACKEND__CELERY__HEAD_HUNTER__BASE_URL: ${HEAD_HUNTER_BASE_URL?Variable not set}
 
 services:
   db:
