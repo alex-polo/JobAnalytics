@@ -230,6 +230,15 @@ class RedisSettings(BaseModel):
         return f"redis://:{self.password.get_secret_value()}@{self.host}:{self.port}/{self.result_db}"
 
 
+class HeadHunterClientSettings(BaseModel):
+    """HeadHunter client settings configuration."""
+
+    base_url: str = "https://hh.ru/search/vacancy"
+    timeout_request: int = 60
+    time_delay: int = 5
+    follow_redirects: bool = True
+
+
 class AppSettings(BaseConfiguration):
     """Server settings configuration."""
 
@@ -245,3 +254,4 @@ class AppSettings(BaseConfiguration):
     GUNICORN: GunicornSettings = GunicornSettings()
     UVICORN: UvicornSettings | None = None
     CORS: CORSSettings = CORSSettings()
+    HEAD_HUNTER_SETTINGS: HeadHunterClientSettings = HeadHunterClientSettings()
