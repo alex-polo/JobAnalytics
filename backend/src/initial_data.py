@@ -1,9 +1,12 @@
 import asyncio
 import logging
+from typing import TYPE_CHECKING
 
 from src.core.config.settings import APP_SETTINGS
 from src.core.database import DB_HANDLER
 from src.core.security import PasswordHasher
+from src.modules.resumes.seed_data import seed_resumes
+from src.modules.sources.seed_data import seed_sources
 from src.users.api.schemas import (
     RoleCreateSchema,
     UserCreateSchema,
@@ -11,17 +14,22 @@ from src.users.api.schemas import (
 from src.users.application.service import UserService
 from src.users.infrastructure.unit_of_work import UsersSqlAlchemyUnitOfWork
 
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 
-async def init() -> None:
+async def ensuring_root_user(
+    async_sessionmaker: async_sessionmaker[AsyncSession],
+) -> None:
     """Initialize database connection."""
     if not APP_SETTINGS.ROOT_USER.should_create:
         log.info("No root user creation required")
         return
 
-    uow = UsersSqlAlchemyUnitOfWork(DB_HANDLER.async_session_maker)
+    uow = UsersSqlAlchemyUnitOfWork(async_sessionmaker)
     pass_hasher = PasswordHasher()
     user_service = UserService(uow, pass_hasher)
 
@@ -44,8 +52,15 @@ async def main() -> None:
     """Run before the server starts."""
     try:
         log.info("Creating initial data")
-        await init()
-        log.info("Initial data successfully ensured/created")
+        log.info("Ensuring root user")
+        await ensuring_root_user(async_sessionmaker=DB_HANDLER.async_session_maker)
+
+        log.info("Initial data for sources")
+        await seed_sources(async_sessionmaker=DB_HANDLER.async_session_maker)
+
+        log.info("Initial data for resumes")
+        await seed_resumes(async_sessionmaker=DB_HANDLER.async_session_maker)
+
     except Exception as e:  # noqa: BLE001
         log.error(f"Initialization failed: {e}")
         exit(1)
