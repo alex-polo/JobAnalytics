@@ -21,12 +21,12 @@ def get_inner_tag(
             {"class": class_name, "data-qa": data_qa},
         )
     elif class_name:
-        inner_tag: Tag | None = html_tag.find(
+        inner_tag: Tag | None = html_tag.find(  # type: ignore[no-redef]
             tag_name,
             class_=class_name,
         )
     else:
-        inner_tag: Tag | None = html_tag.find(tag_name)
+        inner_tag: Tag | None = html_tag.find(tag_name)  # type: ignore[no-redef]
 
     if not inner_tag:
         details = f"Tag: {tag_name}, class: {class_name}, data-qa: {data_qa}"
@@ -35,7 +35,7 @@ def get_inner_tag(
     return inner_tag
 
 
-def parsing_search_page(html_content: str) -> list:
+def parsing_search_page(html_content: str) -> list[VacancySearchParsingEntity]:
     """Parse page vacancies."""
     log.info("Parsing search page...")
     soup = BeautifulSoup(html_content, "lxml")
