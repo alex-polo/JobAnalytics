@@ -16,7 +16,7 @@ async def test_get_session_lifecycle() -> None:
     """Check that session generator works and yields correct object."""
     handler = DatabaseHandler(db_settings=APP_SETTINGS.DATABASE)
 
-    async with handler.get_session() as session:
+    async with handler.async_session_maker() as session:
         assert isinstance(session, AsyncSession)
         assert session.is_active is True
         assert session.bind is handler.async_engine
