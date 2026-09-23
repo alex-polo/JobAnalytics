@@ -13,3 +13,4 @@ dist
 *.pem
 pytest_reports/
 celerybeat-schedule*
+data/
