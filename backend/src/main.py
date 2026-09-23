@@ -17,12 +17,15 @@ from src.middleware import (
     register_middlewares,
 )
 
-setup_logging()
-
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
     from fastapi.routing import APIRoute
+
+import src.core.database.models  # noqa: F401 # type: ignore[unused-ignore]
+
+setup_logging()
+
 
 log = logging.getLogger(__name__)
 

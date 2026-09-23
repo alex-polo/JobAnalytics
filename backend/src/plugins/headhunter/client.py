@@ -37,7 +37,7 @@ class HeadHunterClient:
         self,
         url: str,
         timeout: int = 60,
-        params: dict | None = None,
+        params: dict[str, Any] | None = None,
         follow_redirects: bool = True,
     ) -> str:
         """Download page."""

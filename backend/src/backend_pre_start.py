@@ -30,7 +30,7 @@ AFTER_DELAY: int = 300  # 5 minutes
 async def init() -> None:
     """Initialize test database connection."""
     try:
-        async with DB_HANDLER.get_session() as session:
+        async with DB_HANDLER.async_session_maker() as session:
             await session.execute(select(1))
 
     except Exception:
