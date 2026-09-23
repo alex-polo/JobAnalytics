@@ -10,6 +10,8 @@ from alembic import context
 from src.core.config import APP_SETTINGS
 from src.core.database import Base
 from src.users.infrastructure import models # pyright: ignore
+from src.modules.resumes.infrastructure import models # pyright: ignore
+from src.modules.sources.infrastructure import models # pyright: ignore
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
