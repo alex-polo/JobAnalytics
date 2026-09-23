@@ -28,6 +28,7 @@ dependencies = [
     "celery-types>=0.26.0",
     "beautifulsoup4>=4.15.0",
     "lxml>=6.1.3",
+    "pypdf2>=3.0.1",
 ]
 
 [dependency-groups]
@@ -144,6 +145,8 @@ convention = "google"
 "src/core/database/*.py" = ["N805"]
 "src/core/database/mixins.py" = ["TC002", "TC001"]
 "src/users/infrastructure/models.py" = ["TC001"]
+"src/modules/*/infrastructure/models.py" = ["TC001", "UP037", "F821"]
+"src/modules/*/models.py" = ["TC001", "UP037", "F821"]
 #"alembic/env.py" = ["I001"]
 
 [tool.ruff.lint.pylint]
