@@ -15,3 +15,4 @@ class VacancyParsingEntity(BaseModel):
     url: str
     description: str
     body: str
+    html_content: str

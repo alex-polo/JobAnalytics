@@ -114,4 +114,5 @@ def parse_vacancy_page(html_content: str, url: str) -> VacancyParsingEntity:
         url=url,
         description=description,
         body=vacancy_body,
+        html_content=html_content,
     )
