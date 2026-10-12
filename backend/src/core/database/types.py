@@ -36,6 +36,7 @@ UniqueStr20 = Annotated[str, mapped_column(String(length=20), unique=True)]
 Str20 = Annotated[str, mapped_column(String(length=20))]
 Str100 = Annotated[str, mapped_column(String(length=100))]
 Str255 = Annotated[str, mapped_column(String(length=255))]
+Str2048 = Annotated[str, mapped_column(String(length=2048))]
 TextNotNull = Annotated[str, mapped_column(Text())]
 
 # Optional str types
@@ -45,7 +46,13 @@ OptStr255 = Annotated[str | None, mapped_column(String(length=255))]
 OptStr2048 = Annotated[str | None, mapped_column(String(length=2048))]
 OptText = Annotated[str | None, mapped_column(Text)]
 
+# Timestamps
 
+DataTime = Annotated[datetime, mapped_column(TIMESTAMP(timezone=True))]
+DataTimeNullable = Annotated[
+    datetime | None,
+    mapped_column(TIMESTAMP(timezone=True), nullable=True),
+]
 CreatedAt = Annotated[
     datetime,
     mapped_column(TIMESTAMP(timezone=True), default=utcnow, server_default=func.now()),
