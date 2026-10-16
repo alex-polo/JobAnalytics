@@ -16,6 +16,8 @@ from src.core.schemas.error import ErrorSchema
 from src.middleware import (
     register_middlewares,
 )
+from src.plugins import SourcePluginRegistry
+from src.plugins.headhunter import HeadHunterPlugin
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -28,6 +30,9 @@ setup_logging()
 
 
 log = logging.getLogger(__name__)
+
+registry = SourcePluginRegistry.get_instance()
+registry.register("hh", HeadHunterPlugin(settings=APP_SETTINGS.HEAD_HUNTER_SETTINGS))
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
