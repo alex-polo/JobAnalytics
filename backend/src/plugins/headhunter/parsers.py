@@ -98,7 +98,7 @@ def parse_vacancy_page(html_content: str, url: str) -> VacancyParsingEntity:
     description = get_inner_tag(
         vacancy_section,
         "div",
-        class_name="magritte-flex-container___CVFEY_8-6-7",
+        class_name="magritte-flex-container___CVFEY_8-7-3_xhh",
     ).text
     vacancy_body = get_inner_tag(
         vacancy_section,
