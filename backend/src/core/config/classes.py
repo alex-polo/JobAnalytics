@@ -239,7 +239,7 @@ class HeadHunterClientSettings(BaseModel):
     time_delay: int = 5
     follow_redirects: bool = True
     filter_start_page: int = 0
-    filter_end_page: int = 2
+    filter_end_page: int = 1
 
 
 class AppSettings(BaseConfiguration):
