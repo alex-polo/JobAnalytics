@@ -1,7 +1,9 @@
+import enum
 from datetime import datetime
 from typing import Annotated
 
 from sqlalchemy import TIMESTAMP, Boolean, String, Text, false, func, true
+from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import mapped_column
 
 from src.core.utils import utcnow
@@ -69,7 +71,30 @@ UpdatedAt = Annotated[
     ),
 ]
 
+
+class StatusEventType(enum.Enum):
+    """Scraping session statuses."""
+
+    STARTED = "STARTED"
+    PROCESSING = "PROCESSING"
+    FINISHED = "FINISHED"
+    PENDING = "PENDING"
+    ERROR = "ERROR"
+
+
+STATUS_EVENT_ENUM = SqlEnum(StatusEventType, name="status_event_enum")
+
+StatusEventTypeFieldIdx = Annotated[
+    StatusEventType,
+    mapped_column(
+        STATUS_EVENT_ENUM,
+        nullable=False,
+        index=True,
+    ),
+]
+
 __all__ = (
+    "STATUS_EVENT_ENUM",
     "CreatedAt",
     "DefaultFalse",
     "IntPk",
@@ -78,6 +103,8 @@ __all__ = (
     "OptStr255",
     "OptStr2048",
     "OptText",
+    "StatusEventType",
+    "StatusEventTypeFieldIdx",
     "Str20",
     "Str100",
     "Str255",
