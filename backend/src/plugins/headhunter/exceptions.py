@@ -1,4 +1,7 @@
-class HeadHunterError(Exception):
+from src.plugins.exceptions import BasePluginError
+
+
+class HeadHunterError(BasePluginError):
     """Base exception for the HeadHunter plugin."""
 
     pass

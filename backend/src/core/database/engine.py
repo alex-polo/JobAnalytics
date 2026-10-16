@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Annotated, Final
 
 from fastapi import Depends
+from sqlalchemy import NullPool
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -20,15 +21,25 @@ class DatabaseHandler:
 
     def __init__(self, db_settings: DatabaseSettings) -> None:
         """Initialize the database."""
-        self.async_engine: AsyncEngine = create_async_engine(
-            url=str(db_settings.database_uri),
-            echo=db_settings.echo,
-            echo_pool=db_settings.echo_pool,
-            pool_size=db_settings.pool_size,
-            max_overflow=db_settings.max_overflow,
-            pool_pre_ping=db_settings.pool_pre_ping,
-            pool_recycle=db_settings.pool_recycle,
-        )
+        engine_kwargs = {
+            "url": str(db_settings.database_uri),
+            "echo": db_settings.echo,
+            "echo_pool": db_settings.echo_pool,
+        }
+
+        use_null = db_settings.use_null_pool or db_settings.pool_size == 0
+
+        if use_null:
+            engine_kwargs["poolclass"] = NullPool
+        else:
+            engine_kwargs.update({
+                "pool_size": db_settings.pool_size,
+                "max_overflow": db_settings.max_overflow,
+                "pool_pre_ping": db_settings.pool_pre_ping,
+                "pool_recycle": db_settings.pool_recycle,
+            })
+
+        self.async_engine: AsyncEngine = create_async_engine(**engine_kwargs)
 
         self.async_session_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(
             bind=self.async_engine,

@@ -39,3 +39,10 @@ class ResumesRepository:
         self._session.add(resume)
         await self._session.commit()
         return resume
+
+    async def get_resumes_by_source(self, source_id: int) -> list[ResumeORM]:
+        """Get resumes by source."""
+        result = await self._session.execute(
+            select(ResumeORM).where(ResumeORM.sources.any(id=source_id))
+        )
+        return list(result.scalars().all())

@@ -87,6 +87,7 @@ class DatabaseSettings(BaseModel):
     autoflush: bool = False
     autocommit: bool = False
     expire_on_commit: bool = False
+    use_null_pool: bool = False
 
     naming_convention: dict[str, str] = {
         "ix": "ix_%(column_0_label)s",
@@ -237,6 +238,8 @@ class HeadHunterClientSettings(BaseModel):
     timeout_request: int = 60
     time_delay: int = 5
     follow_redirects: bool = True
+    filter_start_page: int = 0
+    filter_end_page: int = 1
 
 
 class AppSettings(BaseConfiguration):

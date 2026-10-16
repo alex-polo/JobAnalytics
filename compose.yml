@@ -147,6 +147,7 @@ services:
     command: celery -A src.celery_app beat --loglevel=${LOG_LEVEL?Variable not set}
     environment:
       <<: *backend-env
+      BACKEND__DATABASE__USE_NULL_POOL: true
     extra_hosts: *extra-host
     networks:
       - app-network
@@ -168,6 +169,7 @@ services:
     command: celery -A src.celery_app worker --loglevel=${LOG_LEVEL?Variable not set}
     environment:
       <<: *backend-env
+      BACKEND__DATABASE__USE_NULL_POOL: true
     extra_hosts: *extra-host
     networks:
       - app-network

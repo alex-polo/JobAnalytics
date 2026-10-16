@@ -7,6 +7,7 @@ from .exceptions import (
     HHParsingTagNotFoundError,
     HHVacancyInArchiveError,
 )
+from .plugin import HeadHunterPlugin
 from .schemas import VacancyParsingEntity, VacancySearchParsingEntity
 
 __all__ = (
@@ -15,6 +16,7 @@ __all__ = (
     "HeadHunterClient",
     "HeadHunterDownloadPageError",
     "HeadHunterError",
+    "HeadHunterPlugin",
     "HeadHunterSearchPageParsingError",
     "HeadHunterVacancyPageParsingError",
     "VacancyParsingEntity",
