@@ -4,4 +4,6 @@ export const ROUTE_PATHS = {
   DASHBOARD: '/workspace',
   SETTINGS: '/workspace/settings',
   PROFILE: '/workspace/profile',
+  RESUMES: '/workspace/resumes',
+  ANALYZE: '/workspace/analyze',
 } as const;

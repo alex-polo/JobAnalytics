@@ -1,9 +1,11 @@
 import { ROUTE_PATHS } from '@/shared/config';
 import { Breadcrumbs, Footer } from '@/widgets';
 import {
+  Analytics as AnalyticsIcon,
   Dashboard as DashIcon,
   Person as PersonIcon,
   Settings as SettingsIcon,
+  Work as WorkIcon,
 } from '@mui/icons-material';
 import { Box, Paper } from '@mui/material';
 import { useState } from 'react';
@@ -19,7 +21,9 @@ export const DashboardLayout = () => {
 
   const navItems = [
     { text: 'Dashboard', icon: <DashIcon />, path: ROUTE_PATHS.DASHBOARD },
-    { text: 'Profile', icon: <PersonIcon />, path: ROUTE_PATHS.PROFILE },
+    { text: 'Analytics', icon: <AnalyticsIcon />, path: ROUTE_PATHS.ANALYZE },
+    { text: "Resume's", icon: <WorkIcon />, path: ROUTE_PATHS.RESUMES },
+    { text: 'User profile', icon: <PersonIcon />, path: ROUTE_PATHS.PROFILE },
     { text: 'Settings', icon: <SettingsIcon />, path: ROUTE_PATHS.SETTINGS },
   ];
 
