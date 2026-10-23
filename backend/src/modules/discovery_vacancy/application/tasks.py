@@ -18,8 +18,7 @@ import asyncio
 import logging
 from typing import Any
 
-from celery import shared_task
-
+from src.celery_app import celery_app
 from src.core.database.engine import DB_HANDLER
 from src.modules.discovery_vacancy.application.factory import (
     DiscoveryServiceFactory,
@@ -36,8 +35,8 @@ log = logging.getLogger(__name__)
 DOWNLOADS_PER_RUN = 100
 
 
-@shared_task()
-def discover_vacancies() -> dict[str, Any]:
+@celery_app.task(name="discover.vacancy_overview")
+def discover_vacancy_overview() -> dict[str, Any]:
     """Discover vacancies for every source from the scheduler.
 
     Per-source session is required: a failure inside
@@ -137,8 +136,8 @@ def discover_vacancies() -> dict[str, Any]:
     return asyncio.run(inner())
 
 
-@shared_task()
-def download_raw_vacancies() -> dict[str, Any]:
+@celery_app.task(name="discover.dispatch_pending")
+def discover_dispatch_pending() -> dict[str, Any]:
     """Spawn download tasks for pending raw vacancies.
 
     Selects up to ``DOWNLOADS_PER_RUN`` raw vacancies in
@@ -168,7 +167,7 @@ def download_raw_vacancies() -> dict[str, Any]:
         }
 
         for vacancy_id in vacancies_ids:
-            download_single_vacancy.delay(vacancy_id=vacancy_id)
+            discover_download_vacancy.delay(vacancy_id=vacancy_id)
             metrics["spawned_tasks"] += 1
             log.info("Spawned download task, vacancy_id: %s", vacancy_id)
 
@@ -182,8 +181,8 @@ def download_raw_vacancies() -> dict[str, Any]:
     return asyncio.run(spawned_download_tasks())
 
 
-@shared_task()
-def download_single_vacancy(vacancy_id: int) -> dict[str, Any]:
+@celery_app.task(name="discover.download_vacancy")
+def discover_download_vacancy(vacancy_id: int) -> dict[str, Any]:
     """Download a single raw vacancy and persist its content.
 
     HTTP happens outside any transaction. ``BasePluginError`` is an

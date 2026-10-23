@@ -151,7 +151,7 @@ class DiscoveryService:
         """
         payload = {
             "finished_at": datetime.now(tz=ZoneInfo("UTC")),
-            "status": StatusEventType.FINISHED,
+            "status": StatusEventType.DONE,
         }
         await self._repo_discovery_session.update(session_id=session_id, **payload)
 
@@ -200,7 +200,7 @@ class DiscoveryService:
 
             await self._repo_discovery_session.update(
                 session_id=discovery_session_id,
-                status=StatusEventType.ERROR,
+                status=StatusEventType.FAILED,
                 finished_at=datetime.now(tz=ZoneInfo("UTC")),
             )
             await self._repo_discovery_session.add_error(
