@@ -50,3 +50,7 @@ class ResumesService:
     async def get_resume_keywords(self, resume_id: int) -> list[str]:
         """Get resume keywords."""
         return await self.keywords_repo.get_keywords_by_resume_id(resume_id)
+
+    async def get_by_id(self, resume_id: int) -> ResumeORM | None:
+        """Get resume by id."""
+        return await self._resumes_repo.get_by_id(resume_id)
