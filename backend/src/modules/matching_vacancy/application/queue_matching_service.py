@@ -1,11 +1,19 @@
 from typing import TYPE_CHECKING
 
+from sqlalchemy import update
+
+from src.core.database.types import StatusEventType
+from src.modules.matching_vacancy.infrastructure.models import QueueMatchingORM
 from src.modules.matching_vacancy.infrastructure.repositories import (
     QueueMatchingRepository,
 )
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from src.modules.matching_vacancy.domain.entity import QueueMatchingClaimedItem
 
 
 class QueueMatchingService:
@@ -28,6 +36,39 @@ class QueueMatchingService:
         """Add vacancy to queue."""
         await self._repo_queue_matching.add_many(
             resume_ids=resume_ids,
-            raw_vacancy_id=raw_vacancy_id,
+            vacancy_id=raw_vacancy_id,
             keyword=keyword,
         )
+
+    async def claim_batch(self, limit: int) -> list[QueueMatchingClaimedItem]:
+        """Claim batch."""
+        return await self._repo_queue_matching.claim_batch(limit=limit)
+
+    async def mark_done(self, queue_id: int) -> None:
+        """PROCESSING -> DONE."""
+        await self._repo_queue_matching.mark_done(queue_id=queue_id)
+
+    async def mark_failed(
+        self,
+        queue_id: int,
+        error_message: str,
+        error_type: str,
+        error_traceback: str,
+        errored_at: datetime,
+    ) -> None:
+        """Mark queue item as failed with provided error details."""
+        stmt = (
+            update(QueueMatchingORM)
+            .where(
+                QueueMatchingORM.id == queue_id,
+                QueueMatchingORM.status == StatusEventType.PROCESSING,
+            )
+            .values(
+                status=StatusEventType.FAILED,
+                error_message=error_message,
+                error_type=error_type,
+                error_traceback=error_traceback,
+                errored_at=errored_at,
+            )
+        )
+        await self._session.execute(stmt)
