@@ -15,12 +15,16 @@ celery_app.autodiscover_tasks([
 ])
 
 celery_app.conf.beat_schedule = {
-    "dicovery-vacancy-from-sources-every-30-min": {
-        "task": "src.modules.discovery_vacancy.application.tasks.discover_vacancies",
+    "dicovery-vacancy-from-sources-every-15-min": {
+        "task": "discover.vacancy_overview",
         "schedule": crontab(minute="*/15"),
     },
     "spawned-download-vacancy-task-every-1-min": {
-        "task": "src.modules.discovery_vacancy.application.tasks.download_raw_vacancies",  # noqa: E501
+        "task": "discover.dispatch_pending",
+        "schedule": crontab(minute="*/1"),
+    },
+    "matching-vacancy-task-every-1-min": {
+        "task": "matching.dispatch_pending",
         "schedule": crontab(minute="*/1"),
     },
 }
