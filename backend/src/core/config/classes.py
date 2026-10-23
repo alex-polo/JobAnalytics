@@ -242,6 +242,24 @@ class HeadHunterClientSettings(BaseModel):
     filter_end_page: int = 1
 
 
+class LLMSClientConfig(BaseModel):
+    """OpenAI-compatible LLM settings (OpenAI / LM Studio)."""
+
+    base_url: str
+    api_key: SecretStr
+    model_name: str
+    priority: int = 0
+
+
+class LLMSettings(BaseModel):
+    """LLM settings plus OpenAI-compatible endpoints."""
+
+    openai_endpoints: list[LLMSClientConfig] = []
+    temperature: float = 0.0
+    timeout_seconds: int = 60
+    max_retries: int = 3
+
+
 class AppSettings(BaseConfiguration):
     """Server settings configuration."""
 
@@ -258,3 +276,4 @@ class AppSettings(BaseConfiguration):
     UVICORN: UvicornSettings | None = None
     CORS: CORSSettings = CORSSettings()
     HEAD_HUNTER_SETTINGS: HeadHunterClientSettings = HeadHunterClientSettings()
+    LLM_SETTINGS: LLMSettings
