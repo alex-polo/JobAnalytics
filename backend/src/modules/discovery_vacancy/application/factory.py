@@ -11,7 +11,7 @@ from src.modules.matching_vacancy.application.queue_matching_service import (
 )
 from src.modules.resumes.application.services import ResumesService
 from src.modules.sources.application.services import SourcesService
-from src.plugins.registry import SourcePluginRegistry
+from src.plugins.sources.registry import SourcePluginRegistry
 
 from .discovery_service import DiscoveryService
 

@@ -51,6 +51,10 @@ class ResumesService:
         """Get resume keywords."""
         return await self.keywords_repo.get_keywords_by_resume_id(resume_id)
 
-    async def get_by_id(self, resume_id: int) -> ResumeORM | None:
+    async def get_by_id(self, resume_id: int) -> ResumeORM:
         """Get resume by id."""
-        return await self._resumes_repo.get_by_id(resume_id)
+        resume = await self._resumes_repo.get_by_id(resume_id)
+        if resume is None:
+            raise ValueError(f"Resume not found, resume_id: {resume_id}")
+
+        return resume

@@ -29,8 +29,8 @@ from src.modules.discovery_vacancy.infrastructure.models import (
 from src.modules.discovery_vacancy.infrastructure.repositories import (
     DiscoverySessionRepository,
 )
-from src.plugins.base import RawVacancy
 from src.plugins.exceptions import BasePluginError
+from src.plugins.sources.base import RawVacancy
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     )
     from src.modules.resumes.application.services import ResumesService
     from src.modules.sources.application.services import SourcesService
-    from src.plugins import (
+    from src.plugins.sources import (
         RawVacancy,
         RawVacancyFromFilter,
         SourcePluginRegistry,
