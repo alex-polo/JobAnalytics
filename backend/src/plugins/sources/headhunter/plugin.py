@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 
-from src.plugins.base import ISourcePlugin, RawVacancy, RawVacancyFromFilter
+from src.plugins.sources.base import ISourcePlugin, RawVacancy, RawVacancyFromFilter
 
 from .client import HeadHunterClient
 
 if TYPE_CHECKING:
     from src.core.config.classes import HeadHunterClientSettings
-    from src.plugins.headhunter.schemas import (
+    from src.plugins.sources.headhunter.schemas import (
         VacancyParsingEntity,
         VacancySearchParsingEntity,
     )

@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING, Self
 
-from src.plugins.base import ISourcePlugin
+from src.plugins.sources.base import ISourcePlugin
 
 if TYPE_CHECKING:
-    from src.plugins.base import ISourcePlugin
+    from src.plugins.sources.base import ISourcePlugin
 
 
 class SourcePluginRegistry:

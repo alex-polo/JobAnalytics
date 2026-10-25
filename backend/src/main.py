@@ -16,8 +16,7 @@ from src.core.schemas.error import ErrorSchema
 from src.middleware import (
     register_middlewares,
 )
-from src.plugins import SourcePluginRegistry
-from src.plugins.headhunter import HeadHunterPlugin
+from src.plugins.sources import HeadHunterPlugin, SourcePluginRegistry
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
