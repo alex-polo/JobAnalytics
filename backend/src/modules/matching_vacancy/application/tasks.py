@@ -3,10 +3,13 @@ import logging
 from typing import Any
 
 from src.celery_app import celery_app
+from src.core.config.logging import init_celery_sentry
 from src.core.database.engine import DB_HANDLER
 from src.plugins.llm.exceptions import LLMTimeoutError
 
 from .factory import MatchingServiceFactory
+
+init_celery_sentry()
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +28,7 @@ def matching_dispatch_pending() -> dict[str, Any]:
             factory_matching_service = MatchingServiceFactory(db_session=db_session)
             matching_service = factory_matching_service.create_service()
             try:
-                queue_list = await matching_service.queue_claim_batch(limit=5)
+                queue_list = await matching_service.queue_claim_batch(limit=1)
             except Exception as e:
                 log.exception("Error on dispatch matching task, error: %s", e)
                 raise

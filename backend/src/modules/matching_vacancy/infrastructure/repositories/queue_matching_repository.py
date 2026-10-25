@@ -41,6 +41,12 @@ class QueueMatchingRepository:
         )
         self._session.add(queue_matching)
 
+    async def get_by_id(self, id: int) -> QueueMatchingORM | None:
+        """Get by id."""
+        stmt = select(QueueMatchingORM).where(QueueMatchingORM.id == id)
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def add_many(
         self,
         vacancy_id: int,

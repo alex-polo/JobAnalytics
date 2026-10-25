@@ -27,6 +27,14 @@ class QueueMatchingService:
         self._session = session
         self._repo_queue_matching = QueueMatchingRepository(session)
 
+    async def get_by_id(self, queue_id: int) -> QueueMatchingORM:
+        """Get queue item by id."""
+        queue_item = await self._repo_queue_matching.get_by_id(id=queue_id)
+        if queue_item is None:
+            raise ValueError(f"Queue item not found, queue_id: {queue_id}")
+
+        return queue_item
+
     async def add_many_vacancy_to_queue(
         self,
         resume_ids: list[int],
