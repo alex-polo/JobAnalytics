@@ -249,6 +249,9 @@ class LLMSClientConfig(BaseModel):
     api_key: SecretStr
     model_name: str
     priority: int = 0
+    provider: str = "openai"
+    verify_ssl: bool = True
+    scope: str = "GIGACHAT_API_PERS"
 
 
 class LLMSettings(BaseModel):
