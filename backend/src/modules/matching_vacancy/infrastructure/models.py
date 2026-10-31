@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from sqlalchemy import Enum, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database.base import Base
 from src.core.database.mixins import IntIdMixin, TimestampMixin
@@ -12,6 +12,8 @@ from src.core.database.types import (
     IntNotNullIdx,
     JsonB,
     OptBoolean,
+    OptInt,
+    OptStr255,
     OptText,
     StatusEventTypeFieldIdx,
     Str100,
@@ -19,7 +21,10 @@ from src.core.database.types import (
     Str2048,
     TextNotNull,
 )
+from src.modules.discovery_vacancy.infrastructure.models import RawVacancyORM
 from src.modules.matching_vacancy.domain import MatchLevel
+from src.modules.matching_vacancy.domain.schemas import LocationItems
+from src.modules.resumes.infrastructure.models import ResumeORM
 
 
 class QueueMatchingORM(Base, TimestampMixin, IntIdMixin):
@@ -60,6 +65,14 @@ MatchLevelFieldIdx = Annotated[
 ]
 
 
+LocationFieldIdx = Annotated[
+    LocationItems,
+    mapped_column(
+        Enum(LocationItems, name="location_item_enum"), nullable=False, index=True
+    ),
+]
+
+
 class ResumeMatchResultORM(Base, TimestampMixin, IntIdMixin):
     """Resume match result model."""
 
@@ -87,12 +100,31 @@ class ResumeMatchResultORM(Base, TimestampMixin, IntIdMixin):
     level_match: Mapped[DefaultFalse]
     location_match: Mapped[DefaultFalse]
     salary_match: Mapped[OptBoolean]
-    is_remote: Mapped[DefaultFalse]
+    location: Mapped[LocationFieldIdx]
 
     summary: Mapped[TextNotNull]
     strengths: Mapped[JsonB]
     gaps: Mapped[JsonB]
     recommendation: Mapped[TextNotNull]
+
+    prompt_name: Mapped[OptStr255]
+    prompt_version: Mapped[OptStr255]
+    prompt_locale: Mapped[OptStr255]
+    total_tokens: Mapped[OptInt]
+    latency_ms: Mapped[OptInt]
+    input_tokens: Mapped[OptInt]
+    output_tokens: Mapped[OptInt]
+    model_name: Mapped[OptStr255]
+    finish_reason: Mapped[OptStr255]
+
+    vacancy: Mapped["RawVacancyORM"] = relationship(
+        lazy="raise",
+        foreign_keys=[vacancy_id],
+    )
+    resume: Mapped["ResumeORM"] = relationship(
+        lazy="raise",
+        foreign_keys=[resume_id],
+    )
 
     __table_args__ = (
         UniqueConstraint(

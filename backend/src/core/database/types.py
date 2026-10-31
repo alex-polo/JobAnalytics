@@ -19,6 +19,7 @@ IntNotNullIdx = Annotated[
         index=True,
     ),
 ]
+OptInt = Annotated[int, mapped_column(Integer(), nullable=True)]
 IntNotNullDefault0 = Annotated[
     int,
     mapped_column(Integer(), nullable=False, server_default="0"),
