@@ -21,6 +21,12 @@ class HHVacancyInArchiveError(HeadHunterError):
     pass
 
 
+class HHParsingAdvertisingRedirectError(HeadHunterError):
+    """HH parsing advertising redirect error."""
+
+    pass
+
+
 class HeadHunterSearchPageParsingError(HeadHunterError):
     """Exception for errors while parsing the search page."""
 

@@ -101,11 +101,7 @@ class HeadHunterClient:
 
     def get_vacancy(self, url: str) -> VacancyParsingEntity:
         """Fetch and parse a single vacancy page."""
-        html_content = self._download(
-            url=url,
-            follow_redirects=self._settings.follow_redirects,
-            timeout=self._settings.timeout_request,
-        )
+        html_content = self.load_html_content(url=url)
 
         try:
             return parse_vacancy_page(html_content=html_content, url=url)
@@ -113,3 +109,11 @@ class HeadHunterClient:
             raise HeadHunterVacancyPageParsingError(
                 f"Error while parsing vacancy page {url}: {exc}"
             ) from exc
+
+    def load_html_content(self, url: str) -> str:
+        """Load HTML content of a page."""
+        return self._download(
+            url=url,
+            follow_redirects=self._settings.follow_redirects,
+            timeout=self._settings.timeout_request,
+        )
