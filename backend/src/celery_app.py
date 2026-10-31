@@ -15,13 +15,13 @@ celery_app.autodiscover_tasks([
 ])
 
 celery_app.conf.beat_schedule = {
-    "discover-vacancy-overview-every-15-min": {
+    "discover-vacancy-overview-every-20-min": {
         "task": "discover.vacancy_overview",
-        "schedule": crontab(minute="*/15"),
+        "schedule": crontab(minute="*/20"),
     },
-    "discover-dispatch-pending-task-every-1-min": {
+    "discover-dispatch-pending-task-every-7-min": {
         "task": "discover.dispatch_pending",
-        "schedule": crontab(minute="*/1"),
+        "schedule": crontab(minute="*/7"),
     },
     "matching-dispatch-pending-task-every-1-min": {
         "task": "matching.dispatch_pending",
