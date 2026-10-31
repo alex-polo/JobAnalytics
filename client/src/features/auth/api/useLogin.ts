@@ -1,7 +1,8 @@
-import { $api, API_ENDPOINTS, tokenStore } from '@/shared/api';
+import { API_ENDPOINTS, apiClient, tokenStore } from '@/shared/api';
 import { ROUTE_PATHS } from '@/shared/config';
 import { notify } from '@/shared/lib';
 import { useMutation } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { LoginFormValues } from '../model/types';
 
@@ -17,7 +18,7 @@ export const useLogin = () => {
       params.append('username', data.username);
       params.append('password', data.password);
 
-      const response = await $api.post(API_ENDPOINTS.AUTH.LOGIN, params, {
+      const response = await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, params, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
@@ -29,14 +30,20 @@ export const useLogin = () => {
 
       navigate(from, { replace: true });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      if (!isAxiosError(error)) {
+        notify.error('Произошла ошибка при входе');
+        console.error('[Login Error]:', error);
+        return;
+      }
+
       const status = error.response?.status;
       const detail = error.response?.data?.detail;
 
       let userMessage = 'Произошла ошибка при входе';
 
       if (status === 401) {
-        userMessage = userMessage = 'Неверный логин или пароль';
+        userMessage = 'Неверный логин или пароль';
       } else if (status === 400) {
         userMessage =
           typeof detail === 'string' ? detail : 'Некорректный запрос';

@@ -1,4 +1,9 @@
-import { $api, API_ENDPOINTS, queryClient, tokenStore } from '@/shared/api';
+import {
+  API_ENDPOINTS,
+  apiClient,
+  queryClient,
+  tokenStore,
+} from '@/shared/api';
 import { ROUTE_PATHS } from '@/shared/config';
 import { notify } from '@/shared/lib';
 import { useMutation } from '@tanstack/react-query';
@@ -9,7 +14,7 @@ export const useLogout = () => {
 
   return useMutation({
     mutationFn: async () => {
-      return await $api.post(API_ENDPOINTS.AUTH.LOGOUT);
+      return await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT);
     },
     onSettled: () => {
       tokenStore.removeAccessToken();
