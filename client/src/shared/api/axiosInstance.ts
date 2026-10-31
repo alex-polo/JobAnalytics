@@ -5,7 +5,7 @@ import { tokenStore } from './tokenStore';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
-export const $api = axios.create({
+export const apiClient = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
   headers: {
@@ -15,7 +15,7 @@ export const $api = axios.create({
 
 export const authApi = axios.create({ baseURL: import.meta.env.VITE_API_URL });
 
-$api.interceptors.request.use(config => {
+apiClient.interceptors.request.use(config => {
   const token = tokenStore.getAccessToken();
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -23,7 +23,7 @@ $api.interceptors.request.use(config => {
   return config;
 });
 
-$api.interceptors.response.use(
+apiClient.interceptors.response.use(
   res => res,
   async error => {
     const originalRequest = error.config;
@@ -47,7 +47,7 @@ $api.interceptors.response.use(
         tokenStore.setAccessToken(access_token);
 
         originalRequest.headers.Authorization = `Bearer ${access_token}`;
-        return $api(originalRequest);
+        return apiClient(originalRequest);
       } catch (refreshError) {
         tokenStore.removeAccessToken();
         window.location.href = ROUTE_PATHS.LOGIN;

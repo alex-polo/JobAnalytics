@@ -38,9 +38,15 @@ const ProfilePage = lazy(() =>
   }))
 );
 
-const AnalyzePage = lazy(() =>
-  import('@/pages/analyze').then(module => ({
-    default: module.AnalyzePage,
+const ResumeMatchingPage = lazy(() =>
+  import('@/pages/resume-matching').then(module => ({
+    default: module.ResumeMatchingPage,
+  }))
+);
+
+const MatchDetailsPage = lazy(() =>
+  import('@/pages/match-details-page').then(module => ({
+    default: module.MatchDetailsPage,
   }))
 );
 
@@ -99,10 +105,23 @@ export const router = createBrowserRouter([
             },
           },
           {
-            path: ROUTE_PATHS.ANALYZE,
-            element: <AnalyzePage />,
+            path: ROUTE_PATHS.RESUME_MATCHING,
+            element: <ResumeMatchingPage />,
             handle: {
-              crumb: () => ({ label: 'Аналитика', path: ROUTE_PATHS.ANALYZE }),
+              crumb: () => ({
+                label: 'Аналитика резюме',
+                path: ROUTE_PATHS.RESUME_MATCHING,
+              }),
+            },
+          },
+          {
+            path: ROUTE_PATHS.MATCH_DETAILS(':matchId'),
+            element: <MatchDetailsPage />,
+            handle: {
+              crumb: () => ({
+                label: 'Аналитика резюме',
+                path: ROUTE_PATHS.RESUME_MATCHING,
+              }),
             },
           },
           {

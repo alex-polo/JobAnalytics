@@ -25,8 +25,6 @@ export const Breadcrumbs = () => {
     return null;
   }
 
-  // if (crumbs.length === 0) return null;
-
   return (
     <Box sx={{ mb: 2 }}>
       <MuiBreadcrumbs aria-label="breadcrumb">
