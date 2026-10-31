@@ -1,0 +1,1 @@
+export { ResumeMatchTable } from './table';
