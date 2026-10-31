@@ -1,10 +1,16 @@
 import logging
 import traceback
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
-from src.modules.matching_vacancy.domain.schemas import ResumeMatchInput
+from src.modules.matching_vacancy.domain.schemas import (
+    LocationItems,
+    MatchLevel,
+    ResumeMatchDetails,
+    ResumeMatchInput,
+    ResumeMatchListItem,
+)
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,7 +26,7 @@ if TYPE_CHECKING:
     )
     from src.modules.resumes.application.services import ResumesService
     from src.modules.resumes.infrastructure.models import ResumeORM
-    from src.plugins.llm.base import IAIPlugin, LLMResponse
+    from src.plugins.llm.base import IAIPlugin
 
     from .queue_matching_service import (
         QueueMatchingService,
@@ -68,7 +74,7 @@ class MatchingService:
             queue_item.vacancy_id
         )
 
-        response: LLMResponse = await self._ai_plugin.execute(
+        response = await self._ai_plugin.execute(
             payload=ResumeMatchInput(
                 resume_text=resume.text,
                 vacancy_text=(
@@ -78,21 +84,10 @@ class MatchingService:
         )
 
         log.info(
-            "LLM match done queue_id=%s resume_id=%s vacancy_id=%s | "
-            "prompt=%s v%s (%s) model=%s finish=%s | "
-            "tokens in=%s out=%s total=%s latency=%sms",
+            "LLM match done queue_id=%s resume_id=%s vacancy_id=%s | ",
             queue_id,
             queue_item.resume_id,
             queue_item.vacancy_id,
-            response.prompt_name,
-            response.prompt_version,
-            response.prompt_locale,
-            response.model_name,
-            response.finish_reason,
-            response.input_tokens,
-            response.output_tokens,
-            response.total_tokens,
-            response.latency_ms,
         )
 
         matching_dict = response.data.model_dump()
@@ -100,6 +95,15 @@ class MatchingService:
         matching_dict["vacancy_id"] = queue_item.vacancy_id
         matching_dict["url"] = vacancy.url
         matching_dict["keyword"] = queue_item.keyword
+        matching_dict["prompt_name"] = response.prompt_name
+        matching_dict["prompt_version"] = response.prompt_version
+        matching_dict["prompt_locale"] = response.prompt_locale
+        matching_dict["model_name"] = response.model_name
+        matching_dict["finish_reason"] = response.finish_reason
+        matching_dict["input_tokens"] = response.input_tokens
+        matching_dict["output_tokens"] = response.output_tokens
+        matching_dict["total_tokens"] = response.total_tokens
+        matching_dict["latency_ms"] = response.latency_ms
 
         await self._repo_matching.upsert(values=matching_dict)
 
@@ -137,3 +141,46 @@ class MatchingService:
             errored_at=finished_at,
         )
         await self._db_session.commit()
+
+    async def get_matches_list(
+        self,
+        q: str | None = None,
+        match_level: MatchLevel | None = None,
+        location: LocationItems | None = None,
+        date: str | None = None,
+    ) -> list[ResumeMatchListItem]:
+        """Get matches list."""
+        if date and date != "all":
+            days = int(date.rstrip("d"))
+            since = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=days)
+        else:
+            since = None
+
+        matches_rows = await self._repo_matching.get_list_item(
+            q,
+            match_level,
+            location,
+            since,
+        )
+
+        return [
+            ResumeMatchListItem(
+                id=int(row.id),
+                vacancy_title=row.vacancy.job_title,
+                resume_title=row.resume.name,
+                match_score=row.match_score,
+                match_level=row.match_level,
+                keyword=row.keyword,
+                salary="N/A",
+                location=row.location,
+                location_match=row.location_match,
+                url=row.url,
+            )
+            for row in matches_rows
+        ]
+
+    async def get_match_details(self, match_id: int) -> ResumeMatchDetails:
+        """Get match details."""
+        row = await self._repo_matching.get_by_id(match_id)
+
+        return ResumeMatchDetails.model_validate(row)
