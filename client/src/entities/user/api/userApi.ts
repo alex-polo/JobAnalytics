@@ -1,4 +1,4 @@
-import { $api, API_ENDPOINTS, useSession } from '@/shared/api';
+import { API_ENDPOINTS, apiClient, useSession } from '@/shared/api';
 import { useQuery } from '@tanstack/react-query';
 import type { User } from '../model/types';
 
@@ -8,7 +8,7 @@ export const useMe = () => {
   return useQuery<User>({
     queryKey: ['user', 'me'],
     queryFn: async () => {
-      const { data } = await $api.get(API_ENDPOINTS.USER.ME);
+      const { data } = await apiClient.get(API_ENDPOINTS.USER.ME);
       return data;
     },
     enabled: !!session?.isAuth,

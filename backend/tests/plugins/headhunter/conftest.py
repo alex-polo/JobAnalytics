@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 
 from src.core.config.classes import HeadHunterClientSettings
-from src.plugins.headhunter.client import HeadHunterClient
+from src.plugins.sources.headhunter.client import HeadHunterClient
 
 
 @pytest.fixture

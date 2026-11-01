@@ -19,7 +19,7 @@ class RawVacancy(NamedTuple):
     html_content: str
 
 
-class ISourcePlugin:
+class ISourcePlugin(ABC):
     """Base class for source plugins."""
 
     @abstractmethod
@@ -33,13 +33,3 @@ class ISourcePlugin:
     @abstractmethod
     def get_vacancy(self, url: str) -> RawVacancy:
         """Get vacancy by url."""
-
-
-class IAIPlugin(ABC):
-    """Base class for AI plugins."""
-
-    @abstractmethod
-    async def analyze_vacancy(self, vacancy_data: dict): ...  # noqa: ANN201, D102
-
-    @abstractmethod
-    async def match_resume(self, vacancy: dict, resume: dict): ...  # noqa: ANN201, D102

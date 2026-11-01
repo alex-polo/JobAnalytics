@@ -2,13 +2,28 @@ import enum
 from datetime import datetime
 from typing import Annotated
 
-from sqlalchemy import TIMESTAMP, Boolean, String, Text, false, func, true
+from sqlalchemy import TIMESTAMP, Boolean, Integer, String, Text, false, func, true
 from sqlalchemy import Enum as SqlEnum
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import mapped_column
 
 from src.core.utils import utcnow
 
 IntPk = Annotated[int, mapped_column(primary_key=True)]
+IntNotNull = Annotated[int, mapped_column(Integer(), nullable=False)]
+IntNotNullIdx = Annotated[
+    int,
+    mapped_column(
+        Integer(),
+        nullable=False,
+        index=True,
+    ),
+]
+OptInt = Annotated[int, mapped_column(Integer(), nullable=True)]
+IntNotNullDefault0 = Annotated[
+    int,
+    mapped_column(Integer(), nullable=False, server_default="0"),
+]
 DefaultFalse = Annotated[
     bool,
     mapped_column(
@@ -27,6 +42,14 @@ DefaultTrue = Annotated[
     ),
 ]
 
+OptBoolean = Annotated[
+    bool | None,
+    mapped_column(
+        Boolean(),
+        nullable=True,
+    ),
+]
+
 # Unique types
 UniqueEmailStr = Annotated[
     str, mapped_column(String(length=255), unique=True, index=True)
@@ -40,6 +63,8 @@ Str100 = Annotated[str, mapped_column(String(length=100))]
 Str255 = Annotated[str, mapped_column(String(length=255))]
 Str2048 = Annotated[str, mapped_column(String(length=2048))]
 TextNotNull = Annotated[str, mapped_column(Text())]
+
+JsonB = Annotated[list[str], mapped_column(JSONB, default=list)]
 
 # Optional str types
 OptStr20 = Annotated[str | None, mapped_column(String(length=20))]
@@ -75,11 +100,10 @@ UpdatedAt = Annotated[
 class StatusEventType(enum.Enum):
     """Scraping session statuses."""
 
-    STARTED = "STARTED"
     PROCESSING = "PROCESSING"
-    FINISHED = "FINISHED"
     PENDING = "PENDING"
-    ERROR = "ERROR"
+    DONE = "DONE"
+    FAILED = "FAILED"
 
 
 STATUS_EVENT_ENUM = SqlEnum(StatusEventType, name="status_event_enum")

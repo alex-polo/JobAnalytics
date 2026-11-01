@@ -6,9 +6,13 @@ export const API_ENDPOINTS = {
   },
   USER: {
     ME: '/v1/users/me',
-    UPDATE: (id: string) => `/users/${id}`,
+    UPDATE: (id: string) => `v1/users/${id}`,
   },
   DASHBOARD: {
-    STATS: '/dashboard/stats',
+    STATS: 'v1/dashboard/stats',
+  },
+  MATCHES: {
+    LIST: 'v1/resume-matches',
+    DETAILS: (id: string) => `v1/resume-matches/${id}`,
   },
 } as const;

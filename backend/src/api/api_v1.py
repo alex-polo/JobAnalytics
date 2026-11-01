@@ -5,7 +5,7 @@ from src.auth.api import auth_router
 from src.core.config import APP_SETTINGS
 from src.users.api.router import user_router
 
-from .routes import resumes_router
+from .routes import resume_matches_router, resumes_router
 
 api_v1_router = APIRouter(
     prefix=APP_SETTINGS.API_PREFIX.v1.prefix,
@@ -29,3 +29,5 @@ api_v1_router.include_router(auth_router)
 api_v1_router.include_router(user_router)
 
 api_v1_router.include_router(resumes_router)
+
+api_v1_router.include_router(resume_matches_router)

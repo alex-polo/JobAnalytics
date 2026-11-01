@@ -52,11 +52,16 @@ class RawVacancyService:
             limit=limit,
         )
 
-    async def get_by_id(self, vacancy_id: int) -> RawVacancyORM | None:
+    async def get_by_id(self, vacancy_id: int) -> RawVacancyORM:
         """Get raw vacancy by id."""
-        return await self._raw_vacancy_repository.get_by_id(
+        vacancy = await self._raw_vacancy_repository.get_by_id(
             vacancy_id=vacancy_id,
         )
+
+        if vacancy is None:
+            raise ValueError(f"Raw vacancy not found, id: {vacancy_id}")
+
+        return vacancy
 
     async def update_vacancy(self, vacancy_id: int, payload: dict[str, Any]) -> None:
         """Update raw vacancy."""

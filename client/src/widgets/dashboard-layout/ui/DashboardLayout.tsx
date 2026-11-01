@@ -1,9 +1,11 @@
 import { ROUTE_PATHS } from '@/shared/config';
 import { Breadcrumbs, Footer } from '@/widgets';
 import {
+  Analytics as AnalyticsIcon,
   Dashboard as DashIcon,
   Person as PersonIcon,
   Settings as SettingsIcon,
+  Work as WorkIcon,
 } from '@mui/icons-material';
 import { Box, Paper } from '@mui/material';
 import { useState } from 'react';
@@ -19,7 +21,13 @@ export const DashboardLayout = () => {
 
   const navItems = [
     { text: 'Dashboard', icon: <DashIcon />, path: ROUTE_PATHS.DASHBOARD },
-    { text: 'Profile', icon: <PersonIcon />, path: ROUTE_PATHS.PROFILE },
+    {
+      text: 'Matching',
+      icon: <AnalyticsIcon />,
+      path: ROUTE_PATHS.RESUME_MATCHING,
+    },
+    { text: "Resume's", icon: <WorkIcon />, path: ROUTE_PATHS.RESUMES },
+    { text: 'User profile', icon: <PersonIcon />, path: ROUTE_PATHS.PROFILE },
     { text: 'Settings', icon: <SettingsIcon />, path: ROUTE_PATHS.SETTINGS },
   ];
 
@@ -40,7 +48,8 @@ export const DashboardLayout = () => {
           flexGrow: 1,
           display: 'flex',
           flexDirection: 'column',
-          minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+          // minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+          height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
           marginTop: `${NAVBAR_HEIGHT}px`,
           width: { sm: open ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%' },
           maxWidth: '100%',
@@ -49,18 +58,29 @@ export const DashboardLayout = () => {
           transition: theme => theme.transitions.create(['width', 'margin']),
         }}
       >
-        <Box sx={{ p: 3, flexGrow: 1 }}>
-          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+        {/* <Box sx={{ p: 3, flexGrow: 1 }}> */}
+        <Box
+          sx={{
+            p: 3,
+            flexGrow: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+          }}
+        >
+          <Box sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
             <Breadcrumbs />
           </Box>
           <Paper
             elevation={0}
             sx={{
-              p: { xs: 2, md: 4 },
+              p: 2,
               borderRadius: 1,
               border: '1px solid',
               borderColor: 'divider',
-              minHeight: '40vh',
+              flexGrow: 1,
+              minHeight: 0,
+              overflow: 'auto',
               boxShadow: '0px 2px 4px rgba(0,0,0,0.03)',
             }}
           >

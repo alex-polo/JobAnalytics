@@ -31,6 +31,31 @@ const SettingsPage = lazy(() =>
     default: module.SettingsPage,
   }))
 );
+
+const ProfilePage = lazy(() =>
+  import('@/pages/profile').then(module => ({
+    default: module.ProfilePage,
+  }))
+);
+
+const ResumeMatchingPage = lazy(() =>
+  import('@/pages/resume-matching').then(module => ({
+    default: module.ResumeMatchingPage,
+  }))
+);
+
+const MatchDetailsPage = lazy(() =>
+  import('@/pages/match-details-page').then(module => ({
+    default: module.MatchDetailsPage,
+  }))
+);
+
+const ResumesPage = lazy(() =>
+  import('@/pages/resumes').then(module => ({
+    default: module.ResumesPage,
+  }))
+);
+
 export const router = createBrowserRouter([
   // Public pages
   {
@@ -71,6 +96,43 @@ export const router = createBrowserRouter([
           {
             path: ROUTE_PATHS.DASHBOARD,
             element: <DashboardPage />,
+          },
+          {
+            path: ROUTE_PATHS.RESUMES,
+            element: <ResumesPage />,
+            handle: {
+              crumb: () => ({ label: 'Резюме', path: ROUTE_PATHS.RESUMES }),
+            },
+          },
+          {
+            path: ROUTE_PATHS.RESUME_MATCHING,
+            element: <ResumeMatchingPage />,
+            handle: {
+              crumb: () => ({
+                label: 'Аналитика резюме',
+                path: ROUTE_PATHS.RESUME_MATCHING,
+              }),
+            },
+          },
+          {
+            path: ROUTE_PATHS.MATCH_DETAILS(':matchId'),
+            element: <MatchDetailsPage />,
+            handle: {
+              crumb: () => ({
+                label: 'Аналитика резюме',
+                path: ROUTE_PATHS.RESUME_MATCHING,
+              }),
+            },
+          },
+          {
+            path: ROUTE_PATHS.PROFILE,
+            element: <ProfilePage />,
+            handle: {
+              crumb: () => ({
+                label: 'Профиль пользователя',
+                path: ROUTE_PATHS.PROFILE,
+              }),
+            },
           },
           {
             path: ROUTE_PATHS.SETTINGS,

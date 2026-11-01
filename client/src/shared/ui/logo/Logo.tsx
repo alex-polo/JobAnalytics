@@ -1,7 +1,6 @@
-import LiveTvIcon from '@mui/icons-material/LiveTv';
+import { Analytics as AnalyticsIcon } from '@mui/icons-material';
 import { Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-
 interface HeaderLogoProps {
   headerLogoText: string;
   href: string;
@@ -28,7 +27,9 @@ export const HeaderLogoDesktop = ({
         alignItems: 'center',
       }}
     >
-      <LiveTvIcon sx={{ mr: 1, fontSize: 28, transform: 'translateY(-1px)' }} />
+      <AnalyticsIcon
+        sx={{ mr: 1, fontSize: 28, transform: 'translateY(-1px)' }}
+      />
 
       {headerLogoText}
     </Typography>
@@ -53,7 +54,9 @@ export const HeaderLogoMobile = ({ headerLogoText, href }: HeaderLogoProps) => {
         alignItems: 'center',
       }}
     >
-      <LiveTvIcon sx={{ mr: 1, fontSize: 28, transform: 'translateY(-1px)' }} />
+      <AnalyticsIcon
+        sx={{ mr: 1, fontSize: 28, transform: 'translateY(-1px)' }}
+      />
       {headerLogoText}
     </Typography>
   );

@@ -3,14 +3,14 @@ from unittest.mock import Mock, patch
 import httpx
 import pytest
 
-from src.plugins.headhunter import (
+from src.plugins.sources.headhunter import (
     HeadHunterClient,
 )
-from src.plugins.headhunter.exceptions import (
+from src.plugins.sources.headhunter.exceptions import (
     HeadHunterDownloadPageError,
     HeadHunterSearchPageParsingError,
 )
-from src.plugins.headhunter.schemas import VacancySearchParsingEntity
+from src.plugins.sources.headhunter.schemas import VacancySearchParsingEntity
 
 
 class TestHeadHunterClientDownload:

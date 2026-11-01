@@ -29,8 +29,8 @@ from src.modules.discovery_vacancy.infrastructure.models import (
 from src.modules.discovery_vacancy.infrastructure.repositories import (
     DiscoverySessionRepository,
 )
-from src.plugins.base import RawVacancy
 from src.plugins.exceptions import BasePluginError
+from src.plugins.sources.base import RawVacancy
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     )
     from src.modules.resumes.application.services import ResumesService
     from src.modules.sources.application.services import SourcesService
-    from src.plugins import (
+    from src.plugins.sources import (
         RawVacancy,
         RawVacancyFromFilter,
         SourcePluginRegistry,
@@ -151,7 +151,7 @@ class DiscoveryService:
         """
         payload = {
             "finished_at": datetime.now(tz=ZoneInfo("UTC")),
-            "status": StatusEventType.FINISHED,
+            "status": StatusEventType.DONE,
         }
         await self._repo_discovery_session.update(session_id=session_id, **payload)
 
@@ -200,7 +200,7 @@ class DiscoveryService:
 
             await self._repo_discovery_session.update(
                 session_id=discovery_session_id,
-                status=StatusEventType.ERROR,
+                status=StatusEventType.FAILED,
                 finished_at=datetime.now(tz=ZoneInfo("UTC")),
             )
             await self._repo_discovery_session.add_error(

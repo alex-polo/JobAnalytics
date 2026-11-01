@@ -1,0 +1,1 @@
+export { MatchDetailsPage } from './ui';

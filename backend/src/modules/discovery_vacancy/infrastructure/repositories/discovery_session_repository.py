@@ -40,7 +40,7 @@ class DiscoverySessionRepository:
             source_id=source_id,
             started_at=started_at,
             finished_at=None,
-            status=StatusEventType.STARTED,
+            status=StatusEventType.PROCESSING,
             vacancies_found=0,
         )
         self._session.add(discovery_session)
