@@ -79,10 +79,10 @@ class TestGetVacanciesFromSearchPage:
         mock_download.return_value = "<html>search results</html>"
         mock_vacancies = [
             VacancySearchParsingEntity(
-                title="Python Dev", url="https://hh.ru/vacancy/1"
+                external_id="1", title="Python Dev", url="https://hh.ru/vacancy/1"
             ),
             VacancySearchParsingEntity(
-                title="Django Dev", url="https://hh.ru/vacancy/2"
+                external_id="2", title="Django Dev", url="https://hh.ru/vacancy/2"
             ),
         ]
         mock_parse.return_value = mock_vacancies
@@ -127,6 +127,7 @@ class TestGetVacanciesFromSearchPage:
         mock_download.return_value = "<html></html>"
         mock_vacancies = [
             VacancySearchParsingEntity(
+                external_id="1",
                 title="Vacancy",
                 url="https://hh.ru/vacancy/test",
             )

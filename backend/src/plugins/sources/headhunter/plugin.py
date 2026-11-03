@@ -36,7 +36,11 @@ class HeadHunterPlugin(ISourcePlugin):
     ) -> list[RawVacancyFromFilter]:
         """Convert entity to raw vacancy."""
         filtered_search_entitys = [
-            RawVacancyFromFilter(title=filter_vacancy.title, url=filter_vacancy.url)
+            RawVacancyFromFilter(
+                external_id=filter_vacancy.external_id,
+                title=filter_vacancy.title,
+                url=filter_vacancy.url,
+            )
             for filter_vacancy in entitys
         ]
         return filtered_search_entitys
@@ -60,12 +64,12 @@ class HeadHunterPlugin(ISourcePlugin):
 
     def get_vacancy(self, url: str) -> RawVacancy:
         """Get vacancy by url."""
-        search_entity: VacancyParsingEntity = self._client.get_vacancy(url=url)
+        parsed_data: VacancyParsingEntity = self._client.get_vacancy(url=url)
 
         return RawVacancy(
-            title=search_entity.title,
-            url=search_entity.url,
-            description=search_entity.description,
-            body=search_entity.body,
-            html_content=search_entity.html_content,
+            title=parsed_data.title,
+            url=parsed_data.url,
+            description=parsed_data.description,
+            body=parsed_data.body,
+            html_content=parsed_data.html_content,
         )

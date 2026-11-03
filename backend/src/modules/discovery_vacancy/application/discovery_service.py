@@ -18,7 +18,7 @@ Transaction strategy:
 
 import logging
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 from zoneinfo import ZoneInfo
 
@@ -392,13 +392,12 @@ class DiscoveryService:
 
         for vacancy_filter in vacancies_from_filter:
             async with self._db_session.begin():
-                raw_vacancy = await (
-                    self._raw_vacancy_service.register_discovered_vacancy(
-                        session_id=session_id,
-                        source_id=source_id,
-                        url=vacancy_filter.url,
-                        job_title=vacancy_filter.title,
-                    )
+                raw_vacancy = await self._raw_vacancy_service.add_or_get_vacancy(
+                    session_id=session_id,
+                    source_id=source_id,
+                    external_id=vacancy_filter.external_id,
+                    url=vacancy_filter.url,
+                    job_title=vacancy_filter.title,
                 )
                 log.info(
                     "Raw vacancy registered, id: %s, url: %s",
@@ -406,16 +405,20 @@ class DiscoveryService:
                     vacancy_filter.url,
                 )
 
-                await self._queue_matching_service.add_many_vacancy_to_queue(
-                    raw_vacancy_id=raw_vacancy.id,
-                    resume_ids=resume_ids,
-                    keyword=keyword,
-                )
-                log.debug(
-                    "Queue matching added, raw_vacancy_id: %s, resume_count: %s",
-                    raw_vacancy.id,
-                    len(resume_ids),
-                )
+                # Verify that the vacancy was registered the last hour
+                if raw_vacancy.created_at >= datetime.now(
+                    tz=ZoneInfo("UTC")
+                ) - timedelta(hours=1):
+                    await self._queue_matching_service.add_many_on_conflict_do_nothing(
+                        raw_vacancy_id=raw_vacancy.id,
+                        resume_ids=resume_ids,
+                        keyword=keyword,
+                    )
+                    log.debug(
+                        "Queue matching added, raw_vacancy_id: %s, resume_count: %s",
+                        raw_vacancy.id,
+                        len(resume_ids),
+                    )
 
                 await self._queue_analyze_service.add_vacancy_to_queue(
                     vacancy_id=raw_vacancy.id,
@@ -550,6 +553,14 @@ class DiscoveryService:
                 "body": downloaded_vacancy.body,
                 "status": StatusRawVacancyType.DOWNLOADED,
             }
+            payload["experience"] = downloaded_vacancy.experience
+            payload["salary"] = downloaded_vacancy.salary
+            payload["employment"] = downloaded_vacancy.employment
+            payload["civil_contract"] = downloaded_vacancy.civil_contract
+            payload["schedule"] = downloaded_vacancy.schedule
+            payload["working_hours"] = downloaded_vacancy.working_hours
+            payload["work_formats"] = downloaded_vacancy.work_formats
+            payload["company_name"] = downloaded_vacancy.company_name
 
         async with self._db_session.begin():
             await self._raw_vacancy_service.update_vacancy(

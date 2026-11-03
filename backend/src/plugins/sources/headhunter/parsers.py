@@ -2,7 +2,13 @@ import logging
 
 from bs4 import BeautifulSoup, Tag
 
-from .exceptions import HHParsingTagNotFoundError, HHVacancyInArchiveError
+from src.plugins.sources.headhunter.misc import extract_external_id
+
+from .exceptions import (
+    HeadHunterExternalIDNotFoundError,
+    HHParsingTagNotFoundError,
+    HHVacancyInArchiveError,
+)
 from .schemas import VacancyParsingEntity, VacancySearchParsingEntity
 
 log = logging.getLogger(__name__)
@@ -35,7 +41,10 @@ def get_inner_tag(
     return inner_tag
 
 
-def parsing_search_page(html_content: str) -> list[VacancySearchParsingEntity]:
+def parsing_search_page(
+    html_content: str,
+    source_code: str,
+) -> list[VacancySearchParsingEntity]:
     """Parse page vacancies."""
     log.info("Parsing search page...")
     soup = BeautifulSoup(html_content, "lxml")
@@ -62,16 +71,33 @@ def parsing_search_page(html_content: str) -> list[VacancySearchParsingEntity]:
 
         vacancy_title = tag_a.text
         vacancy_link = str(tag_a["href"])
+        try:
+            external_id = extract_external_id(url=vacancy_link, source_code=source_code)
+            if external_id is None:
+                raise HeadHunterExternalIDNotFoundError(
+                    f"External id not found in url {vacancy_link}"
+                )
 
-        vacancies.append(
-            VacancySearchParsingEntity(title=vacancy_title, url=vacancy_link)
-        )
+            vacancies.append(
+                VacancySearchParsingEntity(
+                    external_id=external_id,
+                    title=vacancy_title,
+                    url=vacancy_link,
+                )
+            )
+
+        except HeadHunterExternalIDNotFoundError:
+            log.exception("Error parsing vacancy, url: %s", vacancy_link)
+
     log.info("Vacancies search page parsed successfully.")
 
     return vacancies
 
 
-def parse_vacancy_page(html_content: str, url: str) -> VacancyParsingEntity:
+def parse_vacancy_page(
+    html_content: str,
+    url: str,
+) -> VacancyParsingEntity:
     """Parse vacancies."""
     log.info("Parsing vacancy page...")
 

@@ -22,13 +22,14 @@ class RawVacancyRepository:
         self,
         session_id: int,
         source_id: int,
+        external_id: str,
         url: str,
         job_title: str,
     ) -> RawVacancyORM:
         """Add or get vacancy."""
         vacancy_stmt = select(RawVacancyORM).where(
-            RawVacancyORM.url == url,
-            RawVacancyORM.job_title == job_title,
+            RawVacancyORM.source_id == source_id,
+            RawVacancyORM.external_id == external_id,
         )
         vacancy_result = await self._session.execute(vacancy_stmt)
         vacancy = vacancy_result.scalar_one_or_none()
@@ -37,6 +38,7 @@ class RawVacancyRepository:
             vacancy = RawVacancyORM(
                 session_id=session_id,
                 source_id=source_id,
+                external_id=external_id,
                 url=url,
                 job_title=job_title,
                 html_content=None,

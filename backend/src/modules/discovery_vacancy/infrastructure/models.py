@@ -9,8 +9,10 @@ from src.core.database.mixins import IntIdMixin, TimestampMixin
 from src.core.database.types import (
     DataTime,
     DataTimeNullable,
+    OptStr255,
     OptText,
     StatusEventTypeFieldIdx,
+    Str255,
     Str2048,
     TextNotNull,
 )
@@ -72,6 +74,9 @@ class RawVacancyORM(Base, TimestampMixin, IntIdMixin):
         ForeignKey("sources.id"),
         nullable=False,
     )
+
+    external_id: Mapped[Str255]
+
     status: Mapped[StatusRawVacancyType] = mapped_column(
         SqlEnum(StatusRawVacancyType, name="status_raw_vacancy_enum"),
         nullable=False,
@@ -86,6 +91,14 @@ class RawVacancyORM(Base, TimestampMixin, IntIdMixin):
     body: Mapped[OptText]
     description: Mapped[OptText]
     html_content: Mapped[OptText]
+    salary: Mapped[OptStr255]
+    experience: Mapped[OptStr255]
+    employment: Mapped[OptStr255]
+    civil_contract: Mapped[OptStr255]
+    schedule: Mapped[OptStr255]
+    working_hours: Mapped[OptStr255]
+    work_formats: Mapped[OptStr255]
+    company_name: Mapped[OptStr255]
 
     error_message: Mapped[OptText]
     error_type: Mapped[OptText]
@@ -94,8 +107,8 @@ class RawVacancyORM(Base, TimestampMixin, IntIdMixin):
 
     __table_args__ = (
         UniqueConstraint(
-            "job_title",
-            "url",
-            name="uq_title_url_source",
+            "source_id",
+            "external_id",
+            name="uq_source_id_external_id",
         ),
     )

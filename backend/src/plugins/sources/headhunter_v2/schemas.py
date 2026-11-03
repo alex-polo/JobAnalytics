@@ -5,11 +5,6 @@ from src.plugins.sources.headhunter.schemas import VacancyParsingEntity
 class VacancyParsingEntityV2(VacancyParsingEntity):
     """Base class for vacancy parsing entity version 2."""
 
-    title: str
-    url: str
-    description: str
-    body: str
-    html_content: str
     salary: str | None
     experience: str | None
     employment: str | None

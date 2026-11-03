@@ -1,18 +1,19 @@
-"""CREATE DATABASE
+"""Generate tables
 
-Revision ID: 201755c2c8fe
+Revision ID: 36a3f60af841
 Revises: 
-Create Date: 2026-10-21 21:41:04.765024
+Create Date: 2026-11-03 11:57:35.453233
 
 """
 from collections.abc import Sequence
 
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "201755c2c8fe"
+revision: str = "36a3f60af841"
 down_revision: str | Sequence[str] | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -157,6 +158,7 @@ def upgrade() -> None:
     op.create_table("raw_vacancys",
     sa.Column("session_id", sa.Integer(), nullable=False),
     sa.Column("source_id", sa.Integer(), nullable=False),
+    sa.Column("external_id", sa.String(length=255), nullable=False),
     sa.Column("status", sa.Enum("NOT_DOWNLOADED", "DOWNLOADED", "ERROR", name="status_raw_vacancy_enum"), nullable=False),
     sa.Column("job_title", sa.String(length=2048), nullable=False),
     sa.Column("url", sa.String(length=2048), nullable=False),
@@ -173,7 +175,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(["session_id"], ["discovery_sessions.id"], name=op.f("fk_raw_vacancys_session_id_discovery_sessions"), ondelete="CASCADE"),
     sa.ForeignKeyConstraint(["source_id"], ["sources.id"], name=op.f("fk_raw_vacancys_source_id_sources")),
     sa.PrimaryKeyConstraint("id", name=op.f("pk_raw_vacancys")),
-    sa.UniqueConstraint("job_title", "url", name="uq_title_url_source")
+    sa.UniqueConstraint("source_id", "external_id", name="uq_source_id_external_id")
     )
     op.create_index(op.f("ix_raw_vacancys_status"), "raw_vacancys", ["status"], unique=False)
     op.create_index(op.f("ix_raw_vacancys_url"), "raw_vacancys", ["url"], unique=False)
@@ -213,15 +215,42 @@ def upgrade() -> None:
     op.create_table("resume_match_results",
     sa.Column("resume_id", sa.Integer(), nullable=False),
     sa.Column("vacancy_id", sa.Integer(), nullable=False),
-    sa.Column("score", sa.Float(), nullable=False),
+    sa.Column("url", sa.String(length=2048), nullable=False),
+    sa.Column("keyword", sa.String(length=255), nullable=False),
+    sa.Column("match_score", sa.Integer(), nullable=False),
+    sa.Column("match_level", sa.Enum("perfect", "strong", "moderate", "weak", "mismatch", name="match_level_enum"), nullable=False),
+    sa.Column("matching_skills", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.Column("missing_skills", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.Column("extra_skills", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.Column("experience_match", sa.Boolean(), server_default=sa.text("false"), nullable=False),
+    sa.Column("level_match", sa.Boolean(), server_default=sa.text("false"), nullable=False),
+    sa.Column("location_match", sa.Boolean(), server_default=sa.text("false"), nullable=False),
+    sa.Column("salary_match", sa.Boolean(), nullable=True),
+    sa.Column("location", sa.Enum("remote", "office", "gibrid", name="location_item_enum"), nullable=False),
+    sa.Column("summary", sa.Text(), nullable=False),
+    sa.Column("strengths", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.Column("gaps", postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.Column("recommendation", sa.Text(), nullable=False),
+    sa.Column("prompt_name", sa.String(length=255), nullable=True),
+    sa.Column("prompt_version", sa.String(length=255), nullable=True),
+    sa.Column("prompt_locale", sa.String(length=255), nullable=True),
+    sa.Column("total_tokens", sa.Integer(), nullable=True),
+    sa.Column("latency_ms", sa.Integer(), nullable=True),
+    sa.Column("input_tokens", sa.Integer(), nullable=True),
+    sa.Column("output_tokens", sa.Integer(), nullable=True),
+    sa.Column("model_name", sa.String(length=255), nullable=True),
+    sa.Column("finish_reason", sa.String(length=255), nullable=True),
     sa.Column("created_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
     sa.Column("updated_at", sa.TIMESTAMP(timezone=True), server_default=sa.text("now()"), nullable=False),
     sa.Column("id", sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(["resume_id"], ["resumes.id"], name=op.f("fk_resume_match_results_resume_id_resumes"), ondelete="CASCADE"),
     sa.ForeignKeyConstraint(["vacancy_id"], ["raw_vacancys.id"], name=op.f("fk_resume_match_results_vacancy_id_raw_vacancys"), ondelete="CASCADE"),
     sa.PrimaryKeyConstraint("id", name=op.f("pk_resume_match_results")),
-    sa.UniqueConstraint("resume_id", "vacancy_id", name=op.f("uq_resume_match_results_resume_id_vacancy_id"))
+    sa.UniqueConstraint("resume_id", "vacancy_id", name="uq_match_result_resume_vacancy")
     )
+    op.create_index(op.f("ix_resume_match_results_location"), "resume_match_results", ["location"], unique=False)
+    op.create_index(op.f("ix_resume_match_results_match_level"), "resume_match_results", ["match_level"], unique=False)
+    op.create_index(op.f("ix_resume_match_results_match_score"), "resume_match_results", ["match_score"], unique=False)
     op.create_index(op.f("ix_resume_match_results_resume_id"), "resume_match_results", ["resume_id"], unique=False)
     op.create_index(op.f("ix_resume_match_results_vacancy_id"), "resume_match_results", ["vacancy_id"], unique=False)
     # ### end Alembic commands ###
@@ -232,6 +261,9 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_index(op.f("ix_resume_match_results_vacancy_id"), table_name="resume_match_results")
     op.drop_index(op.f("ix_resume_match_results_resume_id"), table_name="resume_match_results")
+    op.drop_index(op.f("ix_resume_match_results_match_score"), table_name="resume_match_results")
+    op.drop_index(op.f("ix_resume_match_results_match_level"), table_name="resume_match_results")
+    op.drop_index(op.f("ix_resume_match_results_location"), table_name="resume_match_results")
     op.drop_table("resume_match_results")
     op.drop_index(op.f("ix_queue_matchings_vacancy_id"), table_name="queue_matchings")
     op.drop_index(op.f("ix_queue_matchings_status"), table_name="queue_matchings")

@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -52,7 +53,9 @@ class AIPluginResumeMatchOutput(BaseModel):
     # Key points
     experience_match: bool = Field(description="Опыт соответствует уровню вакансии")
     level_match: bool = Field(description="Уровень кандидата = уровню вакансии")
-    location_match: bool = Field(description="Локация/удалёнка подходят")
+    location_match: bool = Field(
+        description="Можно ли по этой вакансии работать удаленно"
+    )
     salary_match: bool | None = Field(default=None, description="Зарплата в рамках")
     location: LocationItems = Field(
         description="Место работы, удаленная, офис или гибрид"
@@ -80,6 +83,7 @@ class ResumeMatchListItem(BaseModel):
     location: LocationItems
     location_match: bool
     url: str
+    created_at: datetime
 
     model_config = ConfigDict(
         alias_generator=to_camel,

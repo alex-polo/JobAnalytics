@@ -27,9 +27,11 @@ async def get_resume_matches(
     match_level: Annotated[MatchLevel | None, Query()] = None,
     location: Annotated[LocationItems | None, Query()] = None,
     date: str | None = None,
+    limit: int = 100,
 ) -> list[ResumeMatchListItem]:
     """Get all active resumes."""
     matches_list: list[ResumeMatchListItem] = await service.get_matches_list(
+        limit=limit,
         q=q,
         match_level=match_level,
         location=location,

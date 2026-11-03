@@ -15,6 +15,9 @@ log = logging.getLogger(__name__)
 
 
 LIMIT_MATCHING = 1
+OPTIONS_MATCHING = {
+    "work_formats": "Удалённо",
+}
 
 
 @celery_app.task(name="matching.dispatch_pending")
@@ -32,7 +35,8 @@ def matching_dispatch_pending() -> dict[str, Any]:
             matching_service = factory_matching_service.create_service()
             try:
                 queue_list = await matching_service.queue_claim_batch(
-                    limit=LIMIT_MATCHING
+                    limit=LIMIT_MATCHING,
+                    options=OPTIONS_MATCHING,
                 )
             except Exception as e:
                 log.exception("Error on dispatch matching task, error: %s", e)

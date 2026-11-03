@@ -67,6 +67,7 @@ class HeadHunterClient:
         keywords: list[str],
         page: int = 0,
         per_page: int = 10,
+        source_code: str = "hh",
     ) -> list[VacancySearchParsingEntity]:
         """Fetch vacancies using required OAuth authentication."""
         vacancies_list: list[VacancySearchParsingEntity] = []
@@ -85,7 +86,10 @@ class HeadHunterClient:
                     follow_redirects=self._settings.follow_redirects,
                 )
                 try:
-                    extend_parsed_vacancies_list = parsing_search_page(html_content)
+                    extend_parsed_vacancies_list = parsing_search_page(
+                        html_content,
+                        source_code=source_code,
+                    )
                 except Exception as exc:
                     raise HeadHunterSearchPageParsingError(
                         f"Error while parsing search page: {exc}"

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import update
 
@@ -35,22 +35,29 @@ class QueueMatchingService:
 
         return queue_item
 
-    async def add_many_vacancy_to_queue(
+    async def add_many_on_conflict_do_nothing(
         self,
         resume_ids: list[int],
         raw_vacancy_id: int,
         keyword: str,
     ) -> None:
         """Add vacancy to queue."""
-        await self._repo_queue_matching.add_many(
+        await self._repo_queue_matching.add_many_on_conflict_do_nothing(
             resume_ids=resume_ids,
             vacancy_id=raw_vacancy_id,
             keyword=keyword,
         )
 
-    async def claim_batch(self, limit: int) -> list[QueueMatchingClaimedItem]:
+    async def claim_batch(
+        self,
+        limit: int,
+        options: dict[str, Any],
+    ) -> list[QueueMatchingClaimedItem]:
         """Claim batch."""
-        return await self._repo_queue_matching.claim_batch(limit=limit)
+        return await self._repo_queue_matching.claim_batch(
+            limit=limit,
+            options=options,
+        )
 
     async def mark_done(self, queue_id: int) -> None:
         """PROCESSING -> DONE."""
