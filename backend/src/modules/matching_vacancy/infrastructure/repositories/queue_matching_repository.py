@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
@@ -47,7 +47,7 @@ class QueueMatchingRepository:
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def add_many(
+    async def add_many_on_conflict_do_nothing(
         self,
         vacancy_id: int,
         resume_ids: list[int],
@@ -73,8 +73,12 @@ class QueueMatchingRepository:
         )
         await self._session.execute(stmt)
 
-    async def claim_batch(self, limit: int = 100) -> list[QueueMatchingClaimedItem]:
-        """Атомарно PENDING -> RUNNING, вернуть захваченные записи."""
+    async def claim_batch(
+        self,
+        options: dict[str, Any],
+        limit: int = 100,
+    ) -> list[QueueMatchingClaimedItem]:
+        """Claim batch."""
         sub_query = (
             select(QueueMatchingORM.id)
             .join(
@@ -85,6 +89,16 @@ class QueueMatchingRepository:
                 QueueMatchingORM.status == StatusEventType.PENDING,
                 RawVacancyORM.status == StatusRawVacancyType.DOWNLOADED,
             )
+        )
+
+        work_format_value = options.get("work_formats")
+        if work_format_value:
+            sub_query = sub_query.where(
+                RawVacancyORM.work_formats.icontains(str(work_format_value))
+            )
+
+        sub_query = (
+            sub_query
             .order_by(QueueMatchingORM.created_at)
             .limit(limit)
             .with_for_update(skip_locked=True, of=QueueMatchingORM)

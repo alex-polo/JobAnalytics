@@ -1,5 +1,6 @@
 import html
 import json
+import logging
 from typing import Any
 
 from bs4 import BeautifulSoup, Tag
@@ -12,6 +13,8 @@ from src.plugins.sources.headhunter.exceptions import (
 )
 
 from .schemas import VacancyParsingEntityV2
+
+log = logging.getLogger(__name__)
 
 EXPERIENCE_MAP: dict[str, str] = {
     "noExperience": "Нет опыта",
@@ -183,21 +186,10 @@ def _is_archived(
     return is_archived, signals
 
 
-def _is_advertising_redirect(
-    vacancy_json: dict[str, Any],
-    vacancy: dict[str, Any],
-) -> bool:
-    """Detect an advertising redirect page.
-
-    HH-Lux-InitialState exists, but vacancy data is missing entirely.
-    """
-    vacancy_id = vacancy.get("vacancyId") or _dig(
-        vacancy_json, "analyticsParams", "vacancyId"
-    )
-    return not vacancy_id
-
-
-def parsing_vacancy_page(html_content: str, url: str) -> VacancyParsingEntityV2:
+def parsing_vacancy_page(
+    html_content: str,
+    url: str,
+) -> VacancyParsingEntityV2:
     """Parse the HTML content of an hh.ru vacancy page."""
     try:
         soup = BeautifulSoup(html_content, "lxml")
@@ -233,14 +225,6 @@ def parsing_vacancy_page(html_content: str, url: str) -> VacancyParsingEntityV2:
             or {}
         )
 
-        # 0) Advertising redirect: cheapest signal that this is not a
-        # vacancy page at all.
-        if _is_advertising_redirect(vacancy_json, vacancy):
-            raise HHParsingAdvertisingRedirectError(
-                f"URL {url} is an advertising redirect, not a vacancy "
-                f"page (no vacancyId in HH-Lux-InitialState)."
-            )
-
         # 1) Archived vacancy: short-circuit before building the header.
         is_archived, archive_signals = _is_archived(vacancy_json, vacancy)
         if is_archived:
@@ -257,6 +241,8 @@ def parsing_vacancy_page(html_content: str, url: str) -> VacancyParsingEntityV2:
         body = _unescape_text(vacancy.get("description"))
         if not title or not body:
             missing = [k for k, v in (("name", title), ("description", body)) if not v]
+            log.error(f"Vacancy {vacancy_json}: {vacancy_json}")
+
             raise HeadHunterVacancyPageParsingError(
                 f"Vacancy {url}: missing required fields {missing} "
                 f"in HH-Lux-InitialState."

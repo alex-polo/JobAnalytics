@@ -31,4 +31,12 @@ class HeadHunterPluginV2(HeadHunterPlugin):
             description=parsed_data.description,
             body=parsed_data.body,
             html_content=parsed_data.html_content,
+            salary=parsed_data.salary,
+            experience=parsed_data.experience,
+            employment=parsed_data.employment,
+            civil_contract=parsed_data.civil_contract,
+            schedule=parsed_data.schedule,
+            working_hours=parsed_data.working_hours,
+            work_formats=parsed_data.work_formats,
+            company_name=parsed_data.company_name,
         )

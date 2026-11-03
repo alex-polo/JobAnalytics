@@ -1,9 +1,10 @@
 import logging
 import traceback
 from datetime import UTC, datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from zoneinfo import ZoneInfo
 
+from src.modules.matching_vacancy.domain.entity import QueueMatchingClaimedItem
 from src.modules.matching_vacancy.domain.schemas import (
     LocationItems,
     MatchLevel,
@@ -55,9 +56,16 @@ class MatchingService:
         self._raw_resume_service: ResumesService = resumes_service
         self._ai_plugin = ai_plugin
 
-    async def queue_claim_batch(self, limit: int) -> list[QueueMatchingClaimedItem]:
+    async def queue_claim_batch(
+        self, limit: int, options: dict[str, Any]
+    ) -> list[QueueMatchingClaimedItem]:
         """Queue claim batch."""
-        list_claimed = await self._queue_matching_service.claim_batch(limit=limit)
+        list_claimed: list[
+            QueueMatchingClaimedItem
+        ] = await self._queue_matching_service.claim_batch(
+            limit=limit,
+            options=options,
+        )
         await self._db_session.commit()
 
         return list_claimed
@@ -67,11 +75,13 @@ class MatchingService:
         queue_item: QueueMatchingORM = await self._queue_matching_service.get_by_id(
             queue_id=queue_id
         )
-        resume: ResumeORM = await self._raw_resume_service.get_by_id(
-            queue_item.resume_id
-        )
+
         vacancy: RawVacancyORM = await self._raw_vacancy_service.get_by_id(
             queue_item.vacancy_id
+        )
+
+        resume: ResumeORM = await self._raw_resume_service.get_by_id(
+            queue_item.resume_id
         )
 
         response = await self._ai_plugin.execute(
@@ -144,6 +154,7 @@ class MatchingService:
 
     async def get_matches_list(
         self,
+        limit: int = 100,
         q: str | None = None,
         match_level: MatchLevel | None = None,
         location: LocationItems | None = None,
@@ -157,10 +168,11 @@ class MatchingService:
             since = None
 
         matches_rows = await self._repo_matching.get_list_item(
-            q,
-            match_level,
-            location,
-            since,
+            limit=limit,
+            q=q,
+            match_level=match_level,
+            location=location,
+            since=since,
         )
 
         return [
@@ -175,6 +187,7 @@ class MatchingService:
                 location=row.location,
                 location_match=row.location_match,
                 url=row.url,
+                created_at=row.created_at,
             )
             for row in matches_rows
         ]

@@ -10,9 +10,13 @@ class HeadHunterError(BasePluginError):
 class HeadHunterDownloadPageError(HeadHunterError):
     """Exception for errors while downloading a page."""
 
+    pass
+
 
 class HHParsingTagNotFoundError(HeadHunterError):
     """HH parsing tag not found error."""
+
+    pass
 
 
 class HHVacancyInArchiveError(HeadHunterError):
@@ -34,6 +38,12 @@ class HeadHunterSearchPageParsingError(HeadHunterError):
 
 
 class HeadHunterVacancyPageParsingError(HeadHunterError):
+    """Exception for errors while parsing the vacancy page."""
+
+    pass
+
+
+class HeadHunterExternalIDNotFoundError(HeadHunterError):
     """Exception for errors while parsing the vacancy page."""
 
     pass

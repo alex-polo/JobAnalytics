@@ -46,6 +46,7 @@ class MatchingRepository:
 
     async def get_list_item(
         self,
+        limit: int,
         q: str | None = None,
         match_level: MatchLevel | None = None,
         location: LocationItems | None = None,
@@ -77,5 +78,7 @@ class MatchingRepository:
                 )
             )
 
-        result = await self._session.execute(stmt)
+        result = await self._session.execute(
+            stmt.order_by(ResumeMatchResultORM.created_at.desc()).limit(limit)
+        )
         return list(result.scalars().unique())

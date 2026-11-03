@@ -24,10 +24,11 @@ class RawVacancyService:
         self._session = session
         self._raw_vacancy_repository = RawVacancyRepository(session)
 
-    async def register_discovered_vacancy(
+    async def add_or_get_vacancy(
         self,
         session_id: int,
         source_id: int,
+        external_id: str,
         url: str,
         job_title: str,
     ) -> RawVacancyORM:
@@ -35,6 +36,7 @@ class RawVacancyService:
         raw_vacancy = await self._raw_vacancy_repository.add_or_get_vacancy(
             session_id=session_id,
             source_id=source_id,
+            external_id=external_id,
             url=url,
             job_title=job_title,
         )

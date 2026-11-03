@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from celery import Celery
 from celery.schedules import crontab
 
@@ -23,8 +25,8 @@ celery_app.conf.beat_schedule = {
         "task": "discover.dispatch_pending",
         "schedule": crontab(minute="*/7"),
     },
-    "matching-dispatch-pending-task-every-1-min": {
+    "matching-dispatch-pending-task-every-20-sec": {
         "task": "matching.dispatch_pending",
-        "schedule": crontab(minute="*/1"),
+        "schedule": timedelta(seconds=20),
     },
 }
